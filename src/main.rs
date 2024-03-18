@@ -72,6 +72,18 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
                 None => Value::Nil,
             }
         }
+        b"GETDEL" => {
+            let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected GETDEL key"))?;
+            match state.get(&key) {
+                Some(Value::String(v)) => {
+                    let val = Value::String(v.clone());
+                    state.remove(&key);
+                    val
+                }
+                Some(_) => anyhow::bail!("GETDEL on non-string value"),
+                None => Value::Nil,
+            }
+        }
         b"INCR" => {
             let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected INCR key"))?;
             incr_by(state, key, 1)?
