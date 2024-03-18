@@ -42,7 +42,7 @@ impl<R: Read> Parser<R> {
 
     fn read_number(&mut self) -> anyhow::Result<usize> {
         let b = self.consume_byte()?;
-        anyhow::ensure!(b.is_ascii_digit(), "expected number, got {:?}", b);
+        anyhow::ensure!(b.is_ascii_digit(), "expected number, got {b}");
         let mut num = (b - b'0') as usize;
         while self.peek().is_some_and(|b| b.is_ascii_digit()) {
             let b = self.consume_byte()?;

@@ -12,9 +12,30 @@ enum Value {
     Nil,
 }
 
+fn int_from_bytes(bytes: &[u8]) -> anyhow::Result<i64> {
+    std::str::from_utf8(bytes)
+        .map_err(|_| anyhow::anyhow!("tried to parse number, got non-utf8 value"))?
+        .parse::<i64>()
+        .map_err(|_| anyhow::anyhow!("tried to parse number, got non-numeric value"))
+}
+
+fn incr_by(state: &mut HashMap<Vec<u8>, Value>, key: Vec<u8>, step: i64) -> anyhow::Result<Value> {
+    let val = step + match state.get(&key) {
+        Some(Value::String(v)) => int_from_bytes(v)?,
+        Some(_) => anyhow::bail!("INCR on non-string value"),
+        None => 0,
+    };
+    state.insert(key, Value::String(val.to_string().into_bytes()));
+    Ok(Value::Number(val))
+}
+
 fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> anyhow::Result<Value> {
     println!("Command: {:?}", cmd);
     let value = match cmd[0].as_slice() {
+        b"DECR" => {
+            let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected DECR key"))?;
+            incr_by(state, key, -1)?
+        }
         b"DEL" => {
             let removed = cmd[1..].iter().filter(|&key| state.remove(key).is_some()).count();
             Value::Number(removed as _)
@@ -26,6 +47,15 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
                 Some(_) => anyhow::bail!("GET on non-string value"),
                 None => Value::Nil,
             }
+        }
+        b"INCR" => {
+            let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected INCR key"))?;
+            incr_by(state, key, 1)?
+        }
+        b"INCRBY" => {
+            let [_, key, step] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected INCRBY key step"))?;
+            let step = int_from_bytes(&step).map_err(|_| anyhow::anyhow!("Invalid step in INCRBY"))?;
+            incr_by(state, key, step)?
         }
         b"SET" => {
             let [_, key, value] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected SET key value"))?;
