@@ -107,6 +107,12 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
             let step = int_from_bytes(&step).map_err(|_| anyhow::anyhow!("Invalid step in INCRBY"))?;
             incr_by(state, key, step)?
         }
+        b"RENAME" => {
+            let [_, key, newkey] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected RENAME key newkey"))?;
+            let val = state.remove(&key).ok_or(anyhow::anyhow!("key does not exist"))?;
+            state.insert(newkey, val);
+            Value::String(b"OK".to_vec())
+        }
         b"SET" => {
             let [_, key, value] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected SET key value"))?;
             state.insert(key, Value::String(value));
