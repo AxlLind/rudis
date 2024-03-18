@@ -23,6 +23,10 @@ enum Response {
     Nil,
 }
 
+fn escape_bytes(bytes: &[u8]) -> String {
+    bytes.iter().flat_map(|&b| std::ascii::escape_default(b)).map(|b| b as char).collect()
+}
+
 fn int_from_bytes(bytes: &[u8]) -> anyhow::Result<i64> {
     std::str::from_utf8(bytes)
         .map_err(|_| anyhow::anyhow!("tried to parse number, got non-utf8 value"))?
@@ -41,7 +45,7 @@ fn incr_by(state: &mut HashMap<Vec<u8>, Value>, key: Vec<u8>, step: i64) -> anyh
 }
 
 fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> anyhow::Result<Response> {
-    println!("Command: {:?}", cmd);
+    println!("Command: {:?}", cmd.iter().map(|s| escape_bytes(s)).collect::<Vec<_>>());
     let value = match cmd[0].as_slice() {
         b"APPEND" => {
             let [_, key, value] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected APPEND key value"))?;
@@ -160,7 +164,7 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
             // TODO: Implement this somehow
             Response::List(vec![])
         }
-        _ => anyhow::bail!("Unrecognized command: {:?}", cmd[0]),
+        _ => anyhow::bail!("Unrecognized command: {:?}", escape_bytes(&cmd[0])),
     };
     Ok(value)
 }
