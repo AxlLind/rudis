@@ -48,6 +48,16 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
             };
             Value::Number(len as _)
         }
+        b"COPY" => {
+            let [_, src, dst] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected COPY src dst"))?;
+            match state.get(&src) {
+                Some(v) => {
+                    state.insert(dst, v.clone());
+                    Value::Number(1)
+                }
+                None => Value::Number(0),
+            }
+        }
         b"DECR" => {
             let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected DECR key"))?;
             incr_by(state, key, -1)?
