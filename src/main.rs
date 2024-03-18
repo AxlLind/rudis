@@ -56,6 +56,9 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
             let removed = cmd[1..].iter().filter(|&key| state.remove(key).is_some()).count();
             Value::Number(removed as _)
         }
+        b"EXISTS" => {
+            Value::Number(cmd[1..].iter().filter(|&key| state.contains_key(key)).count() as _)
+        }
         b"GET" => {
             let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected GET key"))?;
             match state.get(&key) {
