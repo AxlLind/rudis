@@ -102,6 +102,14 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
             state.insert(key, Value::String(value));
             Value::String(b"OK".to_vec())
         }
+        b"STRLEN" => {
+            let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected STRLEN key"))?;
+            match state.get(&key) {
+                Some(Value::String(v)) => Value::Number(v.len() as _),
+                Some(_) => anyhow::bail!("STRLEN on non-string value"),
+                None => Value::Number(0),
+            }
+        }
         b"COMMAND" => {
             // TODO: Implement this somehow
             Value::List(vec![])
