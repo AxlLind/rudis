@@ -84,6 +84,10 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
                 None => Value::Nil,
             }
         }
+        b"GETSET" => {
+            let [_, key, value] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected SET key value"))?;
+            state.insert(key, Value::String(value)).unwrap_or(Value::Nil)
+        }
         b"INCR" => {
             let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected INCR key"))?;
             incr_by(state, key, 1)?
