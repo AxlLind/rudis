@@ -16,7 +16,11 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
     let value = match cmd[0].as_slice() {
         b"GET" => {
             let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected GET key"))?;
-            state.get(&key).cloned().unwrap_or(Value::Nil)
+            match state.get(&key) {
+                Some(Value::String(v)) => Value::String(v.clone()),
+                Some(_) => anyhow::bail!("GET on non-string value"),
+                None => Value::Nil,
+            }
         }
         b"SET" => {
             let [_, key, value] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected SET key value"))?;
