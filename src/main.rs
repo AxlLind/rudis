@@ -32,6 +32,22 @@ fn incr_by(state: &mut HashMap<Vec<u8>, Value>, key: Vec<u8>, step: i64) -> anyh
 fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> anyhow::Result<Value> {
     println!("Command: {:?}", cmd);
     let value = match cmd[0].as_slice() {
+        b"APPEND" => {
+            let [_, key, value] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected APPEND key value"))?;
+            let len = match state.get_mut(&key) {
+                Some(Value::String(v)) => {
+                    v.extend(value);
+                    v.len()
+                },
+                Some(_) => anyhow::bail!("GET on non-string value"),
+                None => {
+                    let len = value.len();
+                    state.insert(key, Value::String(value));
+                    len
+                },
+            };
+            Value::Number(len as _)
+        }
         b"DECR" => {
             let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected DECR key"))?;
             incr_by(state, key, -1)?
