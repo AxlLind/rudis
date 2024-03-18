@@ -52,6 +52,11 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
             let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected DECR key"))?;
             incr_by(state, key, -1)?
         }
+        b"DECRBY" => {
+            let [_, key, step] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected DECRBY key step"))?;
+            let step = int_from_bytes(&step).map_err(|_| anyhow::anyhow!("Invalid step in DECRBY"))?;
+            incr_by(state, key, -step)?
+        }
         b"DEL" => {
             let removed = cmd[1..].iter().filter(|&key| state.remove(key).is_some()).count();
             Value::Number(removed as _)
