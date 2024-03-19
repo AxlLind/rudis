@@ -131,6 +131,34 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, mut cmd: Command) -> any
             let step = int_from_bytes(&step).map_err(|_| anyhow::anyhow!("Invalid step in INCRBY"))?;
             incr_by(state, key, step)?
         }
+        b"LPUSH" => {
+            anyhow::ensure!(cmd.nargs() > 1, "expected LPUSH key element [element ...]");
+            let key = cmd.pop_arg().unwrap();
+            match state.entry(key).or_insert_with(|| Value::List(Vec::new())) {
+                Value::List(list) => {
+                    for (i, e) in cmd.rest().enumerate() {
+                        list.insert(i, e);
+                    }
+                    Response::Number(list.len() as _)
+                }
+                _ => anyhow::bail!("LPUSH on non-list key"),
+            }
+        }
+        b"LRANGE" => {
+            let [key, start, stop] = cmd.pop_args("key start stop")?;
+            let start = int_from_bytes(&start).map_err(|_| anyhow::anyhow!("Non-numeric start value"))?;
+            let stop = int_from_bytes(&stop).map_err(|_| anyhow::anyhow!("Non-numeric stop value"))?;
+            match state.get(&key) {
+                Some(Value::List(list)) => {
+                    let start = if start < 0 {list.len() - 2 - start as usize} else {start as usize};
+                    let stop = if stop < 0 {list.len() - 2 - stop as usize} else {stop as usize};
+                    // TODO: Implement more correct index handling here
+                    Response::List(list[start..=stop].iter().cloned().collect())
+                }
+                Some(_) => anyhow::bail!("LRANGE on non-list key"),
+                None => Response::List(Vec::new()),
+            }
+        }
         b"RENAME" => {
             let [key, newkey] = cmd.pop_args("key newkey")?;
             let val = state.remove(&key).ok_or(anyhow::anyhow!("key does not exist"))?;

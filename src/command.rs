@@ -22,6 +22,10 @@ impl Command {
         self.args.len()
     }
 
+    pub fn pop_arg(&mut self) -> Option<Vec<u8>> {
+        self.args.pop_front()
+    }
+
     pub fn pop_args_inexact<const N: usize>(&mut self) -> Option<[Vec<u8>; N]> {
         let mut args = std::array::from_fn(|_| Vec::new());
         for i in 0..N {
