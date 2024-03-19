@@ -6,6 +6,12 @@ use anyhow;
 mod command;
 use command::{Parser, Command};
 
+macro_rules! parse_args {
+    ($cmd:expr, $($t:ty),+) => {
+        $cmd.parse_args::<($($t),+)>()
+    };
+}
+
 #[allow(unused)] // TODO: remove this
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum Value {
@@ -47,7 +53,7 @@ fn incr_by(state: &mut HashMap<Vec<u8>, Value>, key: Vec<u8>, step: i64) -> anyh
 fn execute_command(state: &mut HashMap<Vec<u8>, Value>, mut cmd: Command) -> anyhow::Result<Response> {
     let value = match cmd.cmd() {
         b"APPEND" => {
-            let [key, value] = cmd.pop_args("key value")?;
+            let (key, value) = cmd.parse_args::<(Vec<u8>, Vec<u8>)>()?;
             let len = match state.get_mut(&key) {
                 Some(Value::String(v)) => {
                     v.extend(value);
@@ -63,7 +69,7 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, mut cmd: Command) -> any
             Response::Number(len as _)
         }
         b"COPY" => {
-            let [src, dst] = cmd.pop_args("src dst")?;
+            let (src, dst) = cmd.parse_args::<(Vec<u8>, Vec<u8>)>()?;
             match state.get(&src) {
                 Some(v) => {
                     state.insert(dst, v.clone());
@@ -73,25 +79,25 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, mut cmd: Command) -> any
             }
         }
         b"DECR" => {
-            let [key] = cmd.pop_args("key")?;
+            let key = cmd.parse_args::<Vec<u8>>()?;
             incr_by(state, key, -1)?
         }
         b"DECRBY" => {
-            let [key, step] = cmd.pop_args("key step")?;
-            let step = int_from_bytes(&step).map_err(|_| anyhow::anyhow!("Invalid step in DECRBY"))?;
+            let (key, step) = cmd.parse_args::<(Vec<u8>, i64)>()?;
             incr_by(state, key, -step)?
         }
         b"DEL" => {
-            anyhow::ensure!(cmd.nargs() > 0, "expected DEL key [key ...]");
-            let removed = cmd.rest().filter(|key| state.remove(key).is_some()).count();
-            Response::Number(removed as _)
+            let keys = cmd.parse_args::<Vec<Vec<u8>>>()?;
+            anyhow::ensure!(!keys.is_empty(), "expected DEL key [key ...]");
+            Response::Number(keys.iter().filter(|&key| state.remove(key).is_some()).count() as _)
         }
         b"EXISTS" => {
-            anyhow::ensure!(cmd.nargs() > 0, "expected EXISTS key [key ...]");
-            Response::Number(cmd.rest().filter(|key| state.contains_key(key)).count() as _)
+            let keys = cmd.parse_args::<Vec<Vec<u8>>>()?;
+            anyhow::ensure!(!keys.is_empty(), "expected EXISTS key [key ...]");
+            Response::Number(keys.iter().filter(|&key| state.contains_key(key)).count() as _)
         }
         b"GET" => {
-            let [key] = cmd.pop_args("key")?;
+            let key = cmd.parse_args::<Vec<u8>>()?;
             match state.get(&key) {
                 Some(Value::String(v)) => Response::String(v.clone()),
                 Some(_) => anyhow::bail!("GET on non-string value"),
@@ -99,7 +105,7 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, mut cmd: Command) -> any
             }
         }
         b"GETDEL" => {
-            let [key] = cmd.pop_args("key")?;
+            let key = cmd.parse_args::<Vec<u8>>()?;
             match state.get(&key) {
                 Some(Value::String(v)) => {
                     let val = Response::String(v.clone());
@@ -111,7 +117,7 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, mut cmd: Command) -> any
             }
         }
         b"GETSET" => {
-            let [key, value] = cmd.pop_args("key value")?;
+            let (key, value) = cmd.parse_args::<(Vec<u8>, Vec<u8>)>()?;
             match state.get(&key) {
                 Some(Value::String(v)) => {
                     let val = Response::String(v.clone());
@@ -123,20 +129,19 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, mut cmd: Command) -> any
             }
         }
         b"INCR" => {
-            let [key] = cmd.pop_args("key")?;
+            let key = cmd.parse_args::<Vec<u8>>()?;
             incr_by(state, key, 1)?
         }
         b"INCRBY" => {
-            let [key, step] = cmd.pop_args("key step")?;
-            let step = int_from_bytes(&step).map_err(|_| anyhow::anyhow!("Invalid step in INCRBY"))?;
+            let (key, step) = cmd.parse_args::<(Vec<u8>, i64)>()?;
             incr_by(state, key, step)?
         }
         b"LPUSH" => {
-            anyhow::ensure!(cmd.nargs() > 1, "expected LPUSH key element [element ...]");
-            let key = cmd.pop_arg().unwrap();
+            let (key, elements) = cmd.parse_args::<(Vec<u8>, Vec<Vec<u8>>)>()?;
+            anyhow::ensure!(!elements.is_empty(), "expected LPUSH key element [element ...]");
             match state.entry(key).or_insert_with(|| Value::List(Vec::new())) {
                 Value::List(list) => {
-                    for (i, e) in cmd.rest().enumerate() {
+                    for (i, e) in elements.into_iter().enumerate() {
                         list.insert(i, e);
                     }
                     Response::Number(list.len() as _)
@@ -145,9 +150,7 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, mut cmd: Command) -> any
             }
         }
         b"LRANGE" => {
-            let [key, start, stop] = cmd.pop_args("key start stop")?;
-            let start = int_from_bytes(&start).map_err(|_| anyhow::anyhow!("Non-numeric start value"))?;
-            let stop = int_from_bytes(&stop).map_err(|_| anyhow::anyhow!("Non-numeric stop value"))?;
+            let (key, start, stop) = cmd.parse_args::<(Vec<u8>, i64, i64)>()?;
             match state.get(&key) {
                 Some(Value::List(list)) => {
                     let start = if start < 0 {list.len() - 2 - start as usize} else {start as usize};
@@ -160,18 +163,18 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, mut cmd: Command) -> any
             }
         }
         b"RENAME" => {
-            let [key, newkey] = cmd.pop_args("key newkey")?;
+            let (key, newkey) = cmd.parse_args::<(Vec<u8>, Vec<u8>)>()?;
             let val = state.remove(&key).ok_or(anyhow::anyhow!("key does not exist"))?;
             state.insert(newkey, val);
             Response::String(b"OK".to_vec())
         }
         b"SET" => {
-            let [key, value] = cmd.pop_args("key value")?;
+            let (key, value) = cmd.parse_args::<(Vec<u8>, Vec<u8>)>()?;
             state.insert(key, Value::String(value));
             Response::String(b"OK".to_vec())
         }
         b"STRLEN" => {
-            let [key] = cmd.pop_args("key")?;
+            let key = cmd.parse_args::<Vec<u8>>()?;
             match state.get(&key) {
                 Some(Value::String(v)) => Response::Number(v.len() as _),
                 Some(_) => anyhow::bail!("STRLEN on non-string value"),
@@ -179,7 +182,7 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, mut cmd: Command) -> any
             }
         }
         b"TYPE" => {
-            let [key] = cmd.pop_args("key")?;
+            let key = cmd.parse_args::<Vec<u8>>()?;
             let t: &[u8] = match state.get(&key) {
                 Some(Value::String(_)) => b"string",
                 Some(Value::List(_)) => b"list",

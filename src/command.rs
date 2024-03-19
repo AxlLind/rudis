@@ -2,6 +2,61 @@ use std::io::Read;
 use std::collections::VecDeque;
 use anyhow;
 
+use crate::escape_bytes;
+
+pub trait FromArgs : Sized {
+    fn from_args(cmd: &mut Command) -> anyhow::Result<Self>;
+}
+
+impl FromArgs for Vec<u8> {
+    fn from_args(cmd: &mut Command) -> anyhow::Result<Self> {
+        cmd.pop_arg().ok_or(anyhow::anyhow!("too few arguments"))
+    }
+}
+
+impl FromArgs for i64 {
+    fn from_args(cmd: &mut Command) -> anyhow::Result<Self> {
+        let v = cmd.pop_arg().ok_or(anyhow::anyhow!("too few arguments"))?;
+        std::str::from_utf8(&v)
+            .map_err(|_| anyhow::anyhow!("tried to parse number, got non-utf8 value"))?
+            .parse()
+            .map_err(|_| anyhow::anyhow!("tried to parse number, got non-numeric value"))
+    }
+}
+
+impl FromArgs for Vec<Vec<u8>> {
+    fn from_args(cmd: &mut Command) -> anyhow::Result<Self> {
+        Ok(std::mem::take(&mut cmd.args).into())
+    }
+}
+
+impl<T1: FromArgs, T2: FromArgs> FromArgs for (T1, T2) {
+    fn from_args(cmd: &mut Command) -> anyhow::Result<Self> {
+        let t1 = T1::from_args(cmd)?;
+        let t2 = T2::from_args(cmd)?;
+        Ok((t1, t2))
+    }
+}
+
+impl<T1: FromArgs, T2: FromArgs, T3: FromArgs> FromArgs for (T1, T2, T3) {
+    fn from_args(cmd: &mut Command) -> anyhow::Result<Self> {
+        let t1 = T1::from_args(cmd)?;
+        let t2 = T2::from_args(cmd)?;
+        let t3 = T3::from_args(cmd)?;
+        Ok((t1, t2, t3))
+    }
+}
+
+impl<T1: FromArgs, T2: FromArgs, T3: FromArgs, T4: FromArgs> FromArgs for (T1, T2, T3, T4) {
+    fn from_args(cmd: &mut Command) -> anyhow::Result<Self> {
+        let t1 = T1::from_args(cmd)?;
+        let t2 = T2::from_args(cmd)?;
+        let t3 = T3::from_args(cmd)?;
+        let t4 = T4::from_args(cmd)?;
+        Ok((t1, t2, t3, t4))
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Command {
     cmd: Vec<u8>,
@@ -18,30 +73,14 @@ impl Command {
         &self.cmd
     }
 
-    pub fn nargs(&self) -> usize {
-        self.args.len()
-    }
-
     pub fn pop_arg(&mut self) -> Option<Vec<u8>> {
         self.args.pop_front()
     }
 
-    pub fn pop_args_inexact<const N: usize>(&mut self) -> Option<[Vec<u8>; N]> {
-        let mut args = std::array::from_fn(|_| Vec::new());
-        for i in 0..N {
-            args[i] = self.args.pop_front()?;
-        }
-        Some(args)
-    }
-
-    pub fn pop_args<const N: usize>(&mut self, expected_args: &str) -> anyhow::Result<[Vec<u8>; N]> {
-        let args = self.pop_args_inexact();
-        let res = if self.args.is_empty() {args} else {None};
-        res.ok_or_else(|| anyhow::anyhow!("expected {} {}", crate::escape_bytes(self.cmd()), expected_args))
-    }
-
-    pub fn rest(self) -> impl Iterator<Item=Vec<u8>> {
-        self.args.into_iter()
+    pub fn parse_args<T: FromArgs>(&mut self) -> anyhow::Result<T> {
+        let res = T::from_args(self)?;
+        anyhow::ensure!(self.args.is_empty(), "Too many arguments to {}", escape_bytes(self.cmd()));
+        Ok(res)
     }
 }
 
@@ -123,8 +162,7 @@ mod test {
     fn test_parse_array() {
         let mut res = Parser::new(b"*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n".as_slice()).read_command().unwrap();
         assert_eq!(res.cmd, b"foo");
-        assert_eq!(res.pop_args("").unwrap(), [b"bar"]);
-        assert_eq!(res.nargs(), 0);
+        assert_eq!(res.parse_args::<Vec<u8>>().unwrap(), b"bar".to_vec());
     }
 
     #[test]
@@ -135,13 +173,12 @@ mod test {
     #[test]
     fn test_parse_pipelined_arrays() {
         let mut parser = Parser::new(b"*1\r\n$1\r\na\r\n*3\r\n$4\r\nabcd\r\n$0\r\n\r\n$2\r\nxx\r\n".as_slice());
-        let res = parser.read_command().unwrap();
+        let mut res = parser.read_command().unwrap();
         assert_eq!(res.cmd, b"a");
-        assert_eq!(res.nargs(), 0);
+        assert!(res.parse_args::<Vec<Vec<u8>>>().unwrap().is_empty());
 
         let mut res = parser.read_command().unwrap();
         assert_eq!(res.cmd, b"abcd");
-        assert_eq!(res.pop_args("").unwrap(), [b"".to_vec(), b"xx".to_vec()]);
-        assert_eq!(res.nargs(), 0);
+        assert_eq!(res.parse_args::<(Vec<u8>, Vec<u8>)>().unwrap(), (b"".to_vec(), b"xx".to_vec()));
     }
 }
