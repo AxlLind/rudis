@@ -4,7 +4,7 @@ use std::io::{BufReader, BufWriter, Write};
 use anyhow;
 
 mod command;
-use command::Parser;
+use command::{Parser, Command};
 
 #[allow(unused)] // TODO: remove this
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -23,7 +23,7 @@ enum Response {
     Nil,
 }
 
-fn escape_bytes(bytes: &[u8]) -> String {
+pub fn escape_bytes(bytes: &[u8]) -> String {
     bytes.iter().flat_map(|&b| std::ascii::escape_default(b)).map(|b| b as char).collect()
 }
 
@@ -44,11 +44,10 @@ fn incr_by(state: &mut HashMap<Vec<u8>, Value>, key: Vec<u8>, step: i64) -> anyh
     Ok(Response::Number(val))
 }
 
-fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> anyhow::Result<Response> {
-    println!("Command: {:?}", cmd.iter().map(|s| escape_bytes(s)).collect::<Vec<_>>());
-    let value = match cmd[0].as_slice() {
+fn execute_command(state: &mut HashMap<Vec<u8>, Value>, mut cmd: Command) -> anyhow::Result<Response> {
+    let value = match cmd.cmd() {
         b"APPEND" => {
-            let [_, key, value] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected APPEND key value"))?;
+            let [key, value] = cmd.pop_args("key value")?;
             let len = match state.get_mut(&key) {
                 Some(Value::String(v)) => {
                     v.extend(value);
@@ -64,7 +63,7 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
             Response::Number(len as _)
         }
         b"COPY" => {
-            let [_, src, dst] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected COPY src dst"))?;
+            let [src, dst] = cmd.pop_args("src dst")?;
             match state.get(&src) {
                 Some(v) => {
                     state.insert(dst, v.clone());
@@ -74,23 +73,25 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
             }
         }
         b"DECR" => {
-            let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected DECR key"))?;
+            let [key] = cmd.pop_args("key")?;
             incr_by(state, key, -1)?
         }
         b"DECRBY" => {
-            let [_, key, step] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected DECRBY key step"))?;
+            let [key, step] = cmd.pop_args("key step")?;
             let step = int_from_bytes(&step).map_err(|_| anyhow::anyhow!("Invalid step in DECRBY"))?;
             incr_by(state, key, -step)?
         }
         b"DEL" => {
-            let removed = cmd[1..].iter().filter(|&key| state.remove(key).is_some()).count();
+            anyhow::ensure!(cmd.nargs() > 0, "expected DEL key [key ...]");
+            let removed = cmd.rest().filter(|key| state.remove(key).is_some()).count();
             Response::Number(removed as _)
         }
         b"EXISTS" => {
-            Response::Number(cmd[1..].iter().filter(|&key| state.contains_key(key)).count() as _)
+            anyhow::ensure!(cmd.nargs() > 0, "expected EXISTS key [key ...]");
+            Response::Number(cmd.rest().filter(|key| state.contains_key(key)).count() as _)
         }
         b"GET" => {
-            let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected GET key"))?;
+            let [key] = cmd.pop_args("key")?;
             match state.get(&key) {
                 Some(Value::String(v)) => Response::String(v.clone()),
                 Some(_) => anyhow::bail!("GET on non-string value"),
@@ -98,7 +99,7 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
             }
         }
         b"GETDEL" => {
-            let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected GETDEL key"))?;
+            let [key] = cmd.pop_args("key")?;
             match state.get(&key) {
                 Some(Value::String(v)) => {
                     let val = Response::String(v.clone());
@@ -110,7 +111,7 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
             }
         }
         b"GETSET" => {
-            let [_, key, value] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected GETSET key value"))?;
+            let [key, value] = cmd.pop_args("key value")?;
             match state.get(&key) {
                 Some(Value::String(v)) => {
                     let val = Response::String(v.clone());
@@ -122,27 +123,27 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
             }
         }
         b"INCR" => {
-            let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected INCR key"))?;
+            let [key] = cmd.pop_args("key")?;
             incr_by(state, key, 1)?
         }
         b"INCRBY" => {
-            let [_, key, step] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected INCRBY key step"))?;
+            let [key, step] = cmd.pop_args("key step")?;
             let step = int_from_bytes(&step).map_err(|_| anyhow::anyhow!("Invalid step in INCRBY"))?;
             incr_by(state, key, step)?
         }
         b"RENAME" => {
-            let [_, key, newkey] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected RENAME key newkey"))?;
+            let [key, newkey] = cmd.pop_args("key newkey")?;
             let val = state.remove(&key).ok_or(anyhow::anyhow!("key does not exist"))?;
             state.insert(newkey, val);
             Response::String(b"OK".to_vec())
         }
         b"SET" => {
-            let [_, key, value] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected SET key value"))?;
+            let [key, value] = cmd.pop_args("key value")?;
             state.insert(key, Value::String(value));
             Response::String(b"OK".to_vec())
         }
         b"STRLEN" => {
-            let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected STRLEN key"))?;
+            let [key] = cmd.pop_args("key")?;
             match state.get(&key) {
                 Some(Value::String(v)) => Response::Number(v.len() as _),
                 Some(_) => anyhow::bail!("STRLEN on non-string value"),
@@ -150,7 +151,7 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
             }
         }
         b"TYPE" => {
-            let [_, key] = cmd.try_into().map_err(|_| anyhow::anyhow!("expected STRLEN key"))?;
+            let [key] = cmd.pop_args("key")?;
             let t: &[u8] = match state.get(&key) {
                 Some(Value::String(_)) => b"string",
                 Some(Value::List(_)) => b"list",
@@ -164,7 +165,7 @@ fn execute_command(state: &mut HashMap<Vec<u8>, Value>, cmd: Vec<Vec<u8>>) -> an
             // TODO: Implement this somehow
             Response::List(vec![])
         }
-        _ => anyhow::bail!("Unrecognized command: {:?}", escape_bytes(&cmd[0])),
+        _ => anyhow::bail!("Unrecognized command: {:?}", escape_bytes(cmd.cmd())),
     };
     Ok(value)
 }
@@ -200,7 +201,7 @@ fn main() -> anyhow::Result<()> {
         let mut parser = Parser::new(BufReader::new(stream.try_clone()?));
         let mut writer = BufWriter::new(stream);
         loop {
-            let r = match parser.read_string_array() {
+            let r = match parser.read_command() {
                 Ok(cmd) => execute_command(&mut state, cmd),
                 Err(e) => Err(e),
             };
@@ -219,7 +220,7 @@ mod tests {
 
     macro_rules! exec_cmd {
         ($state:expr, $($cmd:expr),+) => {
-            execute_command(&mut $state, vec![$($cmd.as_bytes().to_vec(),)+]).unwrap()
+            execute_command(&mut $state, Command::new(vec![$($cmd.as_bytes().to_vec(),)+])).unwrap()
         }
     }
 
