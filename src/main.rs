@@ -153,11 +153,7 @@ fn execute_command(db: &mut Database, mut cmd: Command) -> anyhow::Result<Respon
         b"GETSET" => {
             let (key, value) = cmd.parse_args::<(Vec<u8>, Vec<u8>)>()?;
             match db.get_str(&key)? {
-                Some(s) => {
-                    let val = Response::String(std::mem::take(s));
-                    *s = value;
-                    val
-                }
+                Some(s) => Response::String(std::mem::replace(s, value)),
                 None => Response::Nil,
             }
         }
