@@ -86,6 +86,7 @@ fn incr_by(db: &mut Database, key: Vec<u8>, step: i64) -> anyhow::Result<Respons
 }
 
 fn execute_command(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
+    println!("Got command: {}", cmd);
     let value = match cmd.cmd() {
         b"APPEND" => {
             let (key, value) = cmd.parse_args::<(Vec<u8>, Vec<u8>)>()?;

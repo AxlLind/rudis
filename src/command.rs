@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::io::Read;
 use std::collections::VecDeque;
 use anyhow;
@@ -81,6 +82,16 @@ impl Command {
         let res = T::from_args(self)?;
         anyhow::ensure!(self.args.is_empty(), "Too many arguments to {}", escape_bytes(self.cmd()));
         Ok(res)
+    }
+}
+
+impl Display for Command {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", escape_bytes(self.cmd()))?;
+        for arg in &self.args {
+            write!(f, " {}", escape_bytes(arg))?;
+        }
+        Ok(())
     }
 }
 
