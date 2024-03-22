@@ -200,6 +200,14 @@ fn execute_command(db: &mut Database, mut cmd: Command) -> anyhow::Result<Respon
             db.set(newkey, val);
             Response::String(b"OK".to_vec())
         }
+        b"PING" => {
+            let mut args = cmd.parse_args::<Vec<Vec<u8>>>()?;
+            match args.len() {
+                0 => Response::String(b"PONG".to_vec()),
+                1 => Response::String(std::mem::take(&mut args[0])),
+                _ => anyhow::bail!("expected PING [message]"),
+            }
+        }
         b"SET" => {
             let (key, value) = cmd.parse_args::<(Vec<u8>, Vec<u8>)>()?;
             db.set(key, Value::String(value));
