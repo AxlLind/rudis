@@ -137,8 +137,7 @@ fn execute_command(db: &mut Database, mut cmd: Command) -> anyhow::Result<Respon
             Response::Number(keys.iter().filter(|&key| db.is_set(key)).count() as _)
         }
         "FLUSHALL" => {
-            let args = cmd.parse_args::<Vec<Vec<u8>>>()?;
-            anyhow::ensure!(args.len() < 2, "expected FLUSHALL [ASYNC | SYNC]");
+            let _mode = cmd.parse_args::<Option<Vec<u8>>>()?;
             db.clear();
             Response::String(b"OK".to_vec())
         }
@@ -211,12 +210,8 @@ fn execute_command(db: &mut Database, mut cmd: Command) -> anyhow::Result<Respon
             Response::String(b"OK".to_vec())
         }
         "PING" => {
-            let mut args = cmd.parse_args::<Vec<Vec<u8>>>()?;
-            match args.len() {
-                0 => Response::String(b"PONG".to_vec()),
-                1 => Response::String(std::mem::take(&mut args[0])),
-                _ => anyhow::bail!("expected PING [message]"),
-            }
+            let message = cmd.parse_args::<Option<Vec<u8>>>()?;
+            Response::String(message.unwrap_or_else(|| b"PONG".to_vec()))
         }
         "SET" => {
             let (key, value) = cmd.parse_args::<(Vec<u8>, Vec<u8>)>()?;

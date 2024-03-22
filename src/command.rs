@@ -31,6 +31,15 @@ impl FromArgs for Vec<Vec<u8>> {
     }
 }
 
+impl<T: FromArgs> FromArgs for Option<T> {
+    fn from_args(cmd: &mut Command) -> anyhow::Result<Self> {
+        if !cmd.has_more() {
+            return Ok(None);
+        }
+        T::from_args(cmd).map(|v| Some(v))
+    }
+}
+
 impl<T1: FromArgs, T2: FromArgs> FromArgs for (T1, T2) {
     fn from_args(cmd: &mut Command) -> anyhow::Result<Self> {
         let t1 = T1::from_args(cmd)?;
@@ -71,6 +80,10 @@ impl Command {
         let mut cmd = String::from_utf8(arg1).map_err(|_| anyhow::anyhow!("non-utf8 command"))?;
         cmd.make_ascii_uppercase();
         Ok(Self { cmd, args })
+    }
+
+    pub fn has_more(&self) -> bool {
+        !self.args.is_empty()
     }
 
     pub fn cmd(&self) -> &str {
