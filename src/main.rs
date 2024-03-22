@@ -88,7 +88,7 @@ fn incr_by(db: &mut Database, key: Vec<u8>, step: i64) -> anyhow::Result<Respons
 fn execute_command(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     println!("Got command: {}", cmd);
     let value = match cmd.cmd() {
-        b"APPEND" => {
+        "APPEND" => {
             let (key, value) = cmd.parse_args::<(Vec<u8>, Vec<u8>)>()?;
             let len = match db.get_str(&key)? {
                 Some(v) => {
@@ -103,7 +103,7 @@ fn execute_command(db: &mut Database, mut cmd: Command) -> anyhow::Result<Respon
             };
             Response::Number(len as _)
         }
-        b"COPY" => {
+        "COPY" => {
             let (src, dst) = cmd.parse_args::<(Vec<u8>, Vec<u8>)>()?;
             match db.get(&src) {
                 Some(v) => {
@@ -114,32 +114,32 @@ fn execute_command(db: &mut Database, mut cmd: Command) -> anyhow::Result<Respon
                 None => Response::Number(0),
             }
         }
-        b"DECR" => {
+        "DECR" => {
             let key = cmd.parse_args::<Vec<u8>>()?;
             incr_by(db, key, -1)?
         }
-        b"DECRBY" => {
+        "DECRBY" => {
             let (key, step) = cmd.parse_args::<(Vec<u8>, i64)>()?;
             incr_by(db, key, -step)?
         }
-        b"DEL" => {
+        "DEL" => {
             let keys = cmd.parse_args::<Vec<Vec<u8>>>()?;
             anyhow::ensure!(!keys.is_empty(), "expected DEL key [key ...]");
             Response::Number(keys.iter().filter(|&key| db.del(key).is_some()).count() as _)
         }
-        b"EXISTS" => {
+        "EXISTS" => {
             let keys = cmd.parse_args::<Vec<Vec<u8>>>()?;
             anyhow::ensure!(!keys.is_empty(), "expected EXISTS key [key ...]");
             Response::Number(keys.iter().filter(|&key| db.is_set(key)).count() as _)
         }
-        b"GET" => {
+        "GET" => {
             let key = cmd.parse_args::<Vec<u8>>()?;
             match db.get_str(&key)? {
                 Some(s) => Response::String(s.clone()),
                 None => Response::Nil,
             }
         }
-        b"GETDEL" => {
+        "GETDEL" => {
             let key = cmd.parse_args::<Vec<u8>>()?;
             match db.get_str(&key)? {
                 Some(s) => {
@@ -150,22 +150,22 @@ fn execute_command(db: &mut Database, mut cmd: Command) -> anyhow::Result<Respon
                 None => Response::Nil,
             }
         }
-        b"GETSET" => {
+        "GETSET" => {
             let (key, value) = cmd.parse_args::<(Vec<u8>, Vec<u8>)>()?;
             match db.get_str(&key)? {
                 Some(s) => Response::String(std::mem::replace(s, value)),
                 None => Response::Nil,
             }
         }
-        b"INCR" => {
+        "INCR" => {
             let key = cmd.parse_args::<Vec<u8>>()?;
             incr_by(db, key, 1)?
         }
-        b"INCRBY" => {
+        "INCRBY" => {
             let (key, step) = cmd.parse_args::<(Vec<u8>, i64)>()?;
             incr_by(db, key, step)?
         }
-        b"LPUSH" => {
+        "LPUSH" => {
             let (key, elements) = cmd.parse_args::<(Vec<u8>, Vec<Vec<u8>>)>()?;
             anyhow::ensure!(!elements.is_empty(), "expected LPUSH key element [element ...]");
             match db.get_list(&key)? {
@@ -182,7 +182,7 @@ fn execute_command(db: &mut Database, mut cmd: Command) -> anyhow::Result<Respon
                 }
             }
         }
-        b"LRANGE" => {
+        "LRANGE" => {
             let (key, start, stop) = cmd.parse_args::<(Vec<u8>, i64, i64)>()?;
             match db.get_list(&key)? {
                 Some(list) => {
@@ -194,13 +194,13 @@ fn execute_command(db: &mut Database, mut cmd: Command) -> anyhow::Result<Respon
                 None => Response::List(Vec::new()),
             }
         }
-        b"RENAME" => {
+        "RENAME" => {
             let (key, newkey) = cmd.parse_args::<(Vec<u8>, Vec<u8>)>()?;
             let val = db.del(&key).ok_or(anyhow::anyhow!("key does not exist"))?;
             db.set(newkey, val);
             Response::String(b"OK".to_vec())
         }
-        b"PING" => {
+        "PING" => {
             let mut args = cmd.parse_args::<Vec<Vec<u8>>>()?;
             match args.len() {
                 0 => Response::String(b"PONG".to_vec()),
@@ -208,19 +208,19 @@ fn execute_command(db: &mut Database, mut cmd: Command) -> anyhow::Result<Respon
                 _ => anyhow::bail!("expected PING [message]"),
             }
         }
-        b"SET" => {
+        "SET" => {
             let (key, value) = cmd.parse_args::<(Vec<u8>, Vec<u8>)>()?;
             db.set(key, Value::String(value));
             Response::String(b"OK".to_vec())
         }
-        b"STRLEN" => {
+        "STRLEN" => {
             let key = cmd.parse_args::<Vec<u8>>()?;
             match db.get_str(&key)? {
                 Some(s) => Response::Number(s.len() as _),
                 None => Response::Number(0),
             }
         }
-        b"TYPE" => {
+        "TYPE" => {
             let key = cmd.parse_args::<Vec<u8>>()?;
             let t: &[u8] = match db.get(&key) {
                 Some(Value::String(_)) => b"string",
@@ -231,11 +231,11 @@ fn execute_command(db: &mut Database, mut cmd: Command) -> anyhow::Result<Respon
             };
             Response::String(t.to_vec())
         }
-        b"COMMAND" => {
+        "COMMAND" => {
             // TODO: Implement this somehow
             Response::List(vec![])
         }
-        _ => anyhow::bail!("Unrecognized command: {:?}", escape_bytes(cmd.cmd())),
+        _ => anyhow::bail!("Unrecognized command: {:?}", cmd.cmd()),
     };
     Ok(value)
 }
@@ -290,7 +290,7 @@ mod tests {
 
     macro_rules! exec_cmd {
         ($db:expr, $($cmd:expr),+) => {
-            execute_command(&mut $db, Command::new(vec![$($cmd.as_bytes().to_vec(),)+])).unwrap()
+            execute_command(&mut $db, Command::new(vec![$($cmd.as_bytes().to_vec(),)+]).unwrap()).unwrap()
         }
     }
 

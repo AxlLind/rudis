@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use std::io::Read;
 use std::collections::VecDeque;
-use anyhow;
+use anyhow::Context;
 
 use crate::escape_bytes;
 
@@ -60,17 +60,20 @@ impl<T1: FromArgs, T2: FromArgs, T3: FromArgs, T4: FromArgs> FromArgs for (T1, T
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Command {
-    cmd: Vec<u8>,
+    cmd: String,
     args: VecDeque<Vec<u8>>,
 }
 
 impl Command {
-    pub fn new(args: Vec<Vec<u8>>) -> Self {
+    pub fn new(args: Vec<Vec<u8>>) -> anyhow::Result<Self> {
         let mut args = VecDeque::from(args);
-        Self { cmd: args.pop_front().unwrap(), args }
+        let arg1 = args.pop_front().context("expected non-empty command")?;
+        let mut cmd = String::from_utf8(arg1).map_err(|_| anyhow::anyhow!("non-utf8 command"))?;
+        cmd.make_ascii_uppercase();
+        Ok(Self { cmd, args })
     }
 
-    pub fn cmd(&self) -> &[u8] {
+    pub fn cmd(&self) -> &str {
         &self.cmd
     }
 
@@ -80,14 +83,14 @@ impl Command {
 
     pub fn parse_args<T: FromArgs>(&mut self) -> anyhow::Result<T> {
         let res = T::from_args(self)?;
-        anyhow::ensure!(self.args.is_empty(), "Too many arguments to {}", escape_bytes(self.cmd()));
+        anyhow::ensure!(self.args.is_empty(), "Too many arguments to {}", self.cmd());
         Ok(res)
     }
 }
 
 impl Display for Command {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", escape_bytes(self.cmd()))?;
+        write!(f, "{}", self.cmd())?;
         for arg in &self.args {
             write!(f, " {}", escape_bytes(arg))?;
         }
@@ -158,10 +161,9 @@ impl<R: Read> Parser<R> {
     pub fn read_command(&mut self) -> anyhow::Result<Command> {
         self.expect(b"*")?;
         let len = self.read_number()?;
-        anyhow::ensure!(len > 0, "no command given");
         self.expect(b"\r\n")?;
         let args = (0..len).map(|_| self.read_bulk_string()).collect::<anyhow::Result<_>>()?;
-        Ok(Command::new(args))
+        Command::new(args)
     }
 }
 
@@ -172,7 +174,7 @@ mod test {
     #[test]
     fn test_parse_array() {
         let mut res = Parser::new(b"*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n".as_slice()).read_command().unwrap();
-        assert_eq!(res.cmd, b"foo");
+        assert_eq!(res.cmd, "foo");
         assert_eq!(res.parse_args::<Vec<u8>>().unwrap(), b"bar".to_vec());
     }
 
@@ -185,11 +187,11 @@ mod test {
     fn test_parse_pipelined_arrays() {
         let mut parser = Parser::new(b"*1\r\n$1\r\na\r\n*3\r\n$4\r\nabcd\r\n$0\r\n\r\n$2\r\nxx\r\n".as_slice());
         let mut res = parser.read_command().unwrap();
-        assert_eq!(res.cmd, b"a");
+        assert_eq!(res.cmd, "a");
         assert!(res.parse_args::<Vec<Vec<u8>>>().unwrap().is_empty());
 
         let mut res = parser.read_command().unwrap();
-        assert_eq!(res.cmd, b"abcd");
+        assert_eq!(res.cmd, "abcd");
         assert_eq!(res.parse_args::<(Vec<u8>, Vec<u8>)>().unwrap(), (b"".to_vec(), b"xx".to_vec()));
     }
 }
