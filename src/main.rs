@@ -63,6 +63,10 @@ impl Database {
     fn is_set(&self, key: &[u8]) -> bool {
         self.state.contains_key(key)
     }
+
+    fn clear(&mut self) {
+        self.state.clear();
+    }
 }
 
 pub fn escape_bytes(bytes: &[u8]) -> String {
@@ -131,6 +135,12 @@ fn execute_command(db: &mut Database, mut cmd: Command) -> anyhow::Result<Respon
             let keys = cmd.parse_args::<Vec<Vec<u8>>>()?;
             anyhow::ensure!(!keys.is_empty(), "expected EXISTS key [key ...]");
             Response::Number(keys.iter().filter(|&key| db.is_set(key)).count() as _)
+        }
+        "FLUSHALL" => {
+            let args = cmd.parse_args::<Vec<Vec<u8>>>()?;
+            anyhow::ensure!(args.len() < 2, "expected FLUSHALL [ASYNC | SYNC]");
+            db.clear();
+            Response::String(b"OK".to_vec())
         }
         "GET" => {
             let key = cmd.parse_args::<Vec<u8>>()?;
