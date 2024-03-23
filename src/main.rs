@@ -36,7 +36,10 @@ fn main() -> anyhow::Result<()> {
         let mut writer = BufWriter::new(stream);
         loop {
             let r = match parser.read_command() {
-                Ok(cmd) => execute_command(&mut db, cmd),
+                Ok(cmd) => {
+                    println!("Got command: {}", cmd);
+                    execute_command(&mut db, cmd)
+                },
                 Err(e) => Err(e),
             };
             if let Err(e) = write_response(&mut writer, r) {
