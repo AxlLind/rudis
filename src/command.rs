@@ -187,7 +187,7 @@ mod test {
     #[test]
     fn test_parse_array() {
         let mut res = Parser::new(b"*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n".as_slice()).read_command().unwrap();
-        assert_eq!(res.cmd, "foo");
+        assert_eq!(res.cmd, "FOO");
         assert_eq!(res.parse_args::<Vec<u8>>().unwrap(), b"bar".to_vec());
     }
 
@@ -200,11 +200,13 @@ mod test {
     fn test_parse_pipelined_arrays() {
         let mut parser = Parser::new(b"*1\r\n$1\r\na\r\n*3\r\n$4\r\nabcd\r\n$0\r\n\r\n$2\r\nxx\r\n".as_slice());
         let mut res = parser.read_command().unwrap();
-        assert_eq!(res.cmd, "a");
+        assert_eq!(res.cmd, "A");
         assert!(res.parse_args::<Vec<Vec<u8>>>().unwrap().is_empty());
 
         let mut res = parser.read_command().unwrap();
-        assert_eq!(res.cmd, "abcd");
+        assert_eq!(res.cmd, "ABCD");
         assert_eq!(res.parse_args::<(Vec<u8>, Vec<u8>)>().unwrap(), (b"".to_vec(), b"xx".to_vec()));
+
+        assert!(parser.read_command().is_err())
     }
 }
