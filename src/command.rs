@@ -78,7 +78,7 @@ impl Command {
         let mut args = VecDeque::from(args);
         let arg1 = args.pop_front().context("expected non-empty command")?;
         let mut cmd = String::from_utf8(arg1).map_err(|_| anyhow::anyhow!("non-utf8 command"))?;
-        cmd.make_ascii_uppercase();
+        cmd.make_ascii_lowercase();
         Ok(Self { cmd, args })
     }
 
@@ -186,8 +186,8 @@ mod test {
 
     #[test]
     fn test_parse_array() {
-        let mut res = Parser::new(b"*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n".as_slice()).read_command().unwrap();
-        assert_eq!(res.cmd, "FOO");
+        let mut res = Parser::new(b"*2\r\n$3\r\nFOO\r\n$3\r\nbar\r\n".as_slice()).read_command().unwrap();
+        assert_eq!(res.cmd, "foo");
         assert_eq!(res.parse_args::<ByteString>().unwrap(), b"bar".to_vec());
     }
 
@@ -198,13 +198,13 @@ mod test {
 
     #[test]
     fn test_parse_pipelined_arrays() {
-        let mut parser = Parser::new(b"*1\r\n$1\r\na\r\n*3\r\n$4\r\nabcd\r\n$0\r\n\r\n$2\r\nxx\r\n".as_slice());
+        let mut parser = Parser::new(b"*1\r\n$1\r\nA\r\n*3\r\n$4\r\nABCD\r\n$0\r\n\r\n$2\r\nxx\r\n".as_slice());
         let mut res = parser.read_command().unwrap();
-        assert_eq!(res.cmd, "A");
+        assert_eq!(res.cmd, "a");
         assert!(res.parse_args::<Vec<ByteString>>().unwrap().is_empty());
 
         let mut res = parser.read_command().unwrap();
-        assert_eq!(res.cmd, "ABCD");
+        assert_eq!(res.cmd, "abcd");
         assert_eq!(res.parse_args::<(ByteString, ByteString)>().unwrap(), (b"".to_vec(), b"xx".to_vec()));
 
         assert!(parser.read_command().is_err())
