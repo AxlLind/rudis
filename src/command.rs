@@ -3,13 +3,13 @@ use std::io::Read;
 use std::collections::VecDeque;
 use anyhow::Context;
 
-use crate::escape_bytes;
+use crate::{escape_bytes, ByteString};
 
 pub trait FromArgs : Sized {
     fn from_args(cmd: &mut Command) -> anyhow::Result<Self>;
 }
 
-impl FromArgs for Vec<u8> {
+impl FromArgs for ByteString {
     fn from_args(cmd: &mut Command) -> anyhow::Result<Self> {
         cmd.pop_arg().ok_or(anyhow::anyhow!("too few arguments"))
     }
@@ -25,7 +25,7 @@ impl FromArgs for i64 {
     }
 }
 
-impl FromArgs for Vec<Vec<u8>> {
+impl FromArgs for Vec<ByteString> {
     fn from_args(cmd: &mut Command) -> anyhow::Result<Self> {
         Ok(std::mem::take(&mut cmd.args).into())
     }
@@ -70,11 +70,11 @@ impl<T1: FromArgs, T2: FromArgs, T3: FromArgs, T4: FromArgs> FromArgs for (T1, T
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Command {
     cmd: String,
-    args: VecDeque<Vec<u8>>,
+    args: VecDeque<ByteString>,
 }
 
 impl Command {
-    pub fn new(args: Vec<Vec<u8>>) -> anyhow::Result<Self> {
+    pub fn new(args: Vec<ByteString>) -> anyhow::Result<Self> {
         let mut args = VecDeque::from(args);
         let arg1 = args.pop_front().context("expected non-empty command")?;
         let mut cmd = String::from_utf8(arg1).map_err(|_| anyhow::anyhow!("non-utf8 command"))?;
@@ -90,7 +90,7 @@ impl Command {
         &self.cmd
     }
 
-    pub fn pop_arg(&mut self) -> Option<Vec<u8>> {
+    pub fn pop_arg(&mut self) -> Option<ByteString> {
         self.args.pop_front()
     }
 
@@ -161,7 +161,7 @@ impl<R: Read> Parser<R> {
         Ok(num)
     }
 
-    fn read_bulk_string(&mut self) -> anyhow::Result<Vec<u8>> {
+    fn read_bulk_string(&mut self) -> anyhow::Result<ByteString> {
         self.expect(b"$")?;
         let len = self.read_number()?;
         self.expect(b"\r\n")?;
@@ -188,7 +188,7 @@ mod test {
     fn test_parse_array() {
         let mut res = Parser::new(b"*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n".as_slice()).read_command().unwrap();
         assert_eq!(res.cmd, "FOO");
-        assert_eq!(res.parse_args::<Vec<u8>>().unwrap(), b"bar".to_vec());
+        assert_eq!(res.parse_args::<ByteString>().unwrap(), b"bar".to_vec());
     }
 
     #[test]
@@ -201,11 +201,11 @@ mod test {
         let mut parser = Parser::new(b"*1\r\n$1\r\na\r\n*3\r\n$4\r\nabcd\r\n$0\r\n\r\n$2\r\nxx\r\n".as_slice());
         let mut res = parser.read_command().unwrap();
         assert_eq!(res.cmd, "A");
-        assert!(res.parse_args::<Vec<Vec<u8>>>().unwrap().is_empty());
+        assert!(res.parse_args::<Vec<ByteString>>().unwrap().is_empty());
 
         let mut res = parser.read_command().unwrap();
         assert_eq!(res.cmd, "ABCD");
-        assert_eq!(res.parse_args::<(Vec<u8>, Vec<u8>)>().unwrap(), (b"".to_vec(), b"xx".to_vec()));
+        assert_eq!(res.parse_args::<(ByteString, ByteString)>().unwrap(), (b"".to_vec(), b"xx".to_vec()));
 
         assert!(parser.read_command().is_err())
     }
