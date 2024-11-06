@@ -1,13 +1,22 @@
-use super::{incr_by, RedisCommand};
+use super::{incr_by, CommandInfo, RedisCommand};
 use crate::command::Command;
 use crate::{ByteString, Database, Response};
+
+static INFO: CommandInfo = CommandInfo {
+    name: b"incrby",
+    arity: 0,
+    flags: &[],
+    first_key: 1,
+    last_key: 4,
+    step: 5,
+};
 
 pub struct IncrbyCommand;
 
 impl RedisCommand for IncrbyCommand {
-    fn name(&self) -> &'static str {
-        "incrby"
-    }
+    fn name(&self) -> &'static [u8] { INFO.name }
+
+    fn info(&self) -> &'static CommandInfo { &INFO }
 
     fn run(&self, db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         let (key, step) = cmd.parse_args::<(ByteString, i64)>()?;

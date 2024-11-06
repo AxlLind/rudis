@@ -6,7 +6,7 @@ use crate::{Command, Database, Response, ByteString, Value};
 macro_rules! register_commands {
     ($($m:ident::$c:ident,)+) => {
         $(mod $m;)+
-        const COMMAND_LIST: &[&dyn RedisCommand] = &[$(&$m::$c as _,)+];
+        pub const COMMAND_LIST: &[&dyn RedisCommand] = &[$(&$m::$c as _,)+];
     };
 }
 register_commands!(
@@ -30,7 +30,7 @@ register_commands!(
     renamenx::RenamenxCommand,
     set::SetCommand,
     strlen::StrlenCommand,
-    _type::TypeCommand,
+    type_::TypeCommand,
     unlink::UnlinkCommand,
 );
 
@@ -50,13 +50,22 @@ pub fn incr_by(db: &mut Database, key: ByteString, step: i64) -> anyhow::Result<
     Ok(Response::Number(val))
 }
 
-
-pub trait RedisCommand: Send + Sync {
-    fn run(&self, db: &mut Database, cmd: Command) -> anyhow::Result<Response>;
-
-    fn name(&self) -> &'static str;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CommandInfo {
+    pub name: &'static [u8],
+    pub arity: i64,
+    pub flags: &'static [&'static [u8]],
+    pub first_key: i64,
+    pub last_key: i64,
+    pub step: i64,
 }
 
-pub static COMMANDS: LazyLock<HashMap<&str, &dyn RedisCommand>> = LazyLock::new(||
+pub trait RedisCommand: Send + Sync {
+    fn name(&self) -> &'static [u8];
+    fn info(&self) -> &'static CommandInfo;
+    fn run(&self, db: &mut Database, cmd: Command) -> anyhow::Result<Response>;
+}
+
+pub static COMMANDS: LazyLock<HashMap<&[u8], &dyn RedisCommand>> = LazyLock::new(||
     COMMAND_LIST.iter().map(|&d| (d.name(), d)).collect::<HashMap<_,_>>()
 );

@@ -1,13 +1,22 @@
-use super::RedisCommand;
+use super::{CommandInfo, RedisCommand};
 use crate::command::Command;
 use crate::{Value, ByteString, Database, Response};
+
+static INFO: CommandInfo = CommandInfo {
+    name: b"lpush",
+    arity: 0,
+    flags: &[],
+    first_key: 1,
+    last_key: 4,
+    step: 5,
+};
 
 pub struct LpushCommand;
 
 impl RedisCommand for LpushCommand {
-    fn name(&self) -> &'static str {
-        "lpush"
-    }
+    fn name(&self) -> &'static [u8] { INFO.name }
+
+    fn info(&self) -> &'static CommandInfo { &INFO }
 
     fn run(&self, db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         let (key, elements) = cmd.parse_args::<(ByteString, Vec<ByteString>)>()?;
@@ -21,7 +30,7 @@ impl RedisCommand for LpushCommand {
             }
             None => {
                 let len = elements.len();
-                db.set(key, Value::List(elements));
+                db.set(key, Value::Array(elements));
                 Response::Number(len as _)
             }
         })

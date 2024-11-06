@@ -94,8 +94,12 @@ impl Command {
         self.args.pop_front()
     }
 
+    pub fn parse_partial_args<T: FromArgs>(&mut self) -> anyhow::Result<T> {
+        T::from_args(self)
+    }
+
     pub fn parse_args<T: FromArgs>(&mut self) -> anyhow::Result<T> {
-        let res = T::from_args(self)?;
+        let res = self.parse_partial_args::<T>()?;
         anyhow::ensure!(self.args.is_empty(), "Too many arguments to {}", self.cmd());
         Ok(res)
     }

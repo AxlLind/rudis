@@ -1,13 +1,22 @@
-use super::RedisCommand;
+use super::{CommandInfo, RedisCommand};
 use crate::command::Command;
 use crate::{ByteString, Database, Response};
+
+static INFO: CommandInfo = CommandInfo {
+    name: b"ping",
+    arity: 0,
+    flags: &[],
+    first_key: 1,
+    last_key: 4,
+    step: 5,
+};
 
 pub struct PingCommand;
 
 impl RedisCommand for PingCommand {
-    fn name(&self) -> &'static str {
-        "ping"
-    }
+    fn name(&self) -> &'static [u8] { INFO.name }
+
+    fn info(&self) -> &'static CommandInfo { &INFO }
 
     fn run(&self, _: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         let message = cmd.parse_args::<Option<ByteString>>()?;

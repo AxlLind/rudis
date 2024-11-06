@@ -4,6 +4,7 @@ use anyhow;
 mod command;
 mod commands;
 pub use command::{Parser, Command};
+use commands::CommandInfo;
 pub use commands::COMMANDS;
 
 pub type ByteString = Vec<u8>;
@@ -12,7 +13,7 @@ pub type ByteString = Vec<u8>;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Value {
     String(ByteString),
-    List(Vec<ByteString>),
+    Array(Vec<ByteString>),
     Hash(HashMap<ByteString, ByteString>),
     Set(HashSet<ByteString>),
 }
@@ -20,8 +21,9 @@ pub enum Value {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Response {
     String(ByteString),
-    List(Vec<ByteString>),
     Number(i64),
+    Array(Vec<ByteString>),
+    CommandList(Vec<&'static CommandInfo>),
     Nil,
 }
 
@@ -48,7 +50,7 @@ impl Database {
 
     pub fn get_list(&mut self, key: &[u8]) -> anyhow::Result<Option<&mut Vec<ByteString>>> {
         match self.get(key) {
-            Some(Value::List(v)) => Ok(Some(v)),
+            Some(Value::Array(v)) => Ok(Some(v)),
             Some(_) => anyhow::bail!("expected list value"),
             None => Ok(None)
         }
@@ -76,7 +78,7 @@ pub fn escape_bytes(bytes: &[u8]) -> String {
 }
 
 pub fn execute_command(db: &mut Database, cmd: Command) -> anyhow::Result<Response> {
-    match COMMANDS.get(cmd.cmd()) {
+    match COMMANDS.get(cmd.cmd().as_bytes()) {
         Some(command) => command.run(db, cmd),
         None => anyhow::bail!("Unrecognized command: {:?}", cmd.cmd()),
     }
