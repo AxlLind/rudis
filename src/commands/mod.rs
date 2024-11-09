@@ -6,7 +6,7 @@ use crate::{Command, Database, Response, ByteString, Value};
 macro_rules! register_commands {
     ($($m:ident::$c:ident,)+) => {
         $(mod $m;)+
-        pub const COMMAND_LIST: &[&dyn RedisCommand] = &[$(&$m::$c as _,)+];
+        pub const COMMAND_LIST: &[&dyn RedisCommand] = &[$(&$m::$c as _),+];
     };
 }
 register_commands!(
@@ -30,6 +30,7 @@ register_commands!(
     ping::PingCommand,
     rename::RenameCommand,
     renamenx::RenamenxCommand,
+    rpush::RpushCommand,
     set::SetCommand,
     strlen::StrlenCommand,
     type_::TypeCommand,
