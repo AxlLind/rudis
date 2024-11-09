@@ -67,6 +67,7 @@ register_commands!(
     sadd,
     set,
     sismember,
+    smembers,
     strlen,
     type_,
     unlink,
