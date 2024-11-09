@@ -149,7 +149,7 @@ impl<R: Read> Parser<R> {
     fn expect(&mut self, pat: &[u8]) -> anyhow::Result<()> {
         for &expected in pat {
             let b = self.consume_byte()?;
-            anyhow::ensure!(expected == b, "expected {expected}, got {b}");
+            anyhow::ensure!(expected == b, "expected {:?}, got {:?}", expected as char, b as char);
         }
         Ok(())
     }

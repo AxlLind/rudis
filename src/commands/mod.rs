@@ -57,6 +57,7 @@ register_commands!(
     incr,
     incrby,
     llen,
+    lpop,
     lpush,
     lrange,
     ping,
