@@ -14,6 +14,7 @@ register_commands!(
     command::CommandCommand,
     copy::CopyCommand,
     decr::DecrCommand,
+    dbsize::DbsizeCommand,
     decrby::DecrbyCommand,
     del::DelCommand,
     exists::ExistsCommand,

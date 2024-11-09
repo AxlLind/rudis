@@ -22,11 +22,14 @@ impl<const N: usize> AsResponse for [&str; N] {
     }
 }
 
+/*
 struct Nil;
+
 
 impl AsResponse for Nil {
     fn as_response(_: Self) -> Response { Response::Nil }
 }
+*/
 
 macro_rules! compatability_tests {
     ($id:ident : { commands: [$($cmd:expr,)+], results: [$($res:expr,)+], since: $since:literal $(,)?}, $($rest:tt)*) => {
