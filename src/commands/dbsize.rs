@@ -4,11 +4,14 @@ use crate::{Database, Response};
 
 static INFO: CommandInfo = CommandInfo {
     name: b"dbsize",
-    arity: 0,
-    flags: &[],
-    first_key: 1,
-    last_key: 4,
-    step: 5,
+    arity: 1,
+    flags: &[
+        b"readonly",
+        b"fast",
+    ],
+    first_key: 0,
+    last_key: 0,
+    step: 0,
 };
 
 pub struct Cmd;

@@ -4,13 +4,16 @@ use crate::{ByteString, Database, Response};
 
 static INFO: CommandInfo = CommandInfo {
     name: b"decrby",
-    arity: 0,
-    flags: &[],
+    arity: 3,
+    flags: &[
+        b"write",
+        b"denyoom",
+        b"fast",
+    ],
     first_key: 1,
-    last_key: 4,
-    step: 5,
+    last_key: 1,
+    step: 1,
 };
-
 
 pub struct Cmd;
 
