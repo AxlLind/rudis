@@ -26,6 +26,7 @@ register_commands!(
     incr::IncrCommand,
     incrby::IncrbyCommand,
     lpush::LpushCommand,
+    llen::LlenCommand,
     lrange::LrangeCommand,
     ping::PingCommand,
     rename::RenameCommand,
