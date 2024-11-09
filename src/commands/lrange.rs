@@ -25,7 +25,7 @@ impl RedisCommand for Cmd {
                 let start = if start < 0 {list.len() - 2 - start as usize} else {start as usize};
                 let stop = if stop < 0 {list.len() - 2 - stop as usize} else {stop as usize};
                 // TODO: Implement more correct index handling here
-                Response::Array(list[start..=stop].iter().cloned().collect())
+                Response::Array(list[start..=stop].to_vec())
             }
             None => Response::Array(Vec::new()),
         })

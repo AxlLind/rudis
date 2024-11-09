@@ -1,5 +1,4 @@
 use std::collections::{HashMap, HashSet};
-use anyhow;
 
 mod command;
 mod commands;
@@ -27,15 +26,12 @@ pub enum Response {
     Nil,
 }
 
+#[derive(Default)]
 pub struct Database {
     state: HashMap<ByteString, Value>
 }
 
 impl Database {
-    pub fn new() -> Self {
-        Self { state: HashMap::new() }
-    }
-
     pub fn get(&mut self, key: &[u8]) -> Option<&mut Value> {
         self.state.get_mut(key)
     }
@@ -96,7 +92,7 @@ mod tests {
 
     #[test]
     fn test_get_set() {
-        let mut db = Database::new();
+        let mut db = Database::default();
         assert_eq!(exec_cmd!(db, "GET", "a"), Response::Nil);
 
         assert_eq!(exec_cmd!(db, "SET", "a", "b"), Response::String(b"OK".to_vec()));

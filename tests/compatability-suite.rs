@@ -32,7 +32,7 @@ macro_rules! compatability_tests {
     ($id:ident : { commands: [$($cmd:expr,)+], results: [$($res:expr,)+], since: $since:literal $(,)?}, $($rest:tt)*) => {
         #[test]
         fn $id() -> anyhow::Result<()> {
-            let mut db = Database::new();
+            let mut db = Database::default();
             let results = [
                 $({
                     let cmd = Command::new($cmd.split(' ').map(|w| w.as_bytes().to_vec()).collect()).unwrap();

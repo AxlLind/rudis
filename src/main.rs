@@ -41,7 +41,7 @@ fn write_response(writer: &mut impl Write, res: Response) -> anyhow::Result<()> 
 
 fn main() -> anyhow::Result<()> {
     let listener = TcpListener::bind(("0.0.0.0", 8888))?;
-    let mut db = Database::new();
+    let mut db = Database::default();
     for stream in listener.incoming() {
         let stream = stream?;
         let mut parser = Parser::new(BufReader::new(stream.try_clone()?));
