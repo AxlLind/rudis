@@ -11,9 +11,9 @@ static INFO: CommandInfo = CommandInfo {
     step: 5,
 };
 
-pub struct RpushCommand;
+pub struct Cmd;
 
-impl RedisCommand for RpushCommand {
+impl RedisCommand for Cmd {
     fn info(&self) -> &'static CommandInfo { &INFO }
 
     fn run(&self, db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {

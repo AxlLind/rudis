@@ -3,41 +3,6 @@ use std::sync::LazyLock;
 
 use crate::{Command, Database, Response, ByteString, Value};
 
-macro_rules! register_commands {
-    ($($m:ident::$c:ident,)+) => {
-        $(mod $m;)+
-        pub const COMMAND_LIST: &[&dyn RedisCommand] = &[$(&$m::$c as _),+];
-    };
-}
-register_commands!(
-    append::AppendCommand,
-    command::CommandCommand,
-    copy::CopyCommand,
-    decr::DecrCommand,
-    dbsize::DbsizeCommand,
-    decrby::DecrbyCommand,
-    del::DelCommand,
-    exists::ExistsCommand,
-    flushall::FlushallCommand,
-    flushdb::FlushdbCommand,
-    get::GetCommand,
-    getdel::GetdelCommand,
-    getset::GetsetCommand,
-    incr::IncrCommand,
-    incrby::IncrbyCommand,
-    lpush::LpushCommand,
-    llen::LlenCommand,
-    lrange::LrangeCommand,
-    ping::PingCommand,
-    rename::RenameCommand,
-    renamenx::RenamenxCommand,
-    rpush::RpushCommand,
-    set::SetCommand,
-    strlen::StrlenCommand,
-    type_::TypeCommand,
-    unlink::UnlinkCommand,
-);
-
 fn int_from_bytes(bytes: &[u8]) -> anyhow::Result<i64> {
     std::str::from_utf8(bytes)
         .map_err(|_| anyhow::anyhow!("tried to parse number, got non-utf8 value"))?
@@ -69,6 +34,41 @@ pub trait RedisCommand: Send + Sync {
     fn run(&self, db: &mut Database, cmd: Command) -> anyhow::Result<Response>;
 }
 
+macro_rules! register_commands {
+    ($($command:ident,)+) => {
+        $(mod $command;)+
+        pub const COMMAND_LIST: &[&dyn RedisCommand] = &[$(&$command::Cmd as _),+];
+    };
+}
+register_commands!(
+    append,
+    command,
+    copy,
+    dbsize,
+    decr,
+    decrby,
+    del,
+    exists,
+    flushall,
+    flushdb,
+    get,
+    getdel,
+    getset,
+    incr,
+    incrby,
+    llen,
+    lpush,
+    lrange,
+    ping,
+    rename,
+    renamenx,
+    rpush,
+    set,
+    strlen,
+    type_,
+    unlink,
+);
+
 pub static COMMANDS: LazyLock<HashMap<&[u8], &dyn RedisCommand>> = LazyLock::new(||
-    COMMAND_LIST.iter().map(|&d| (d.info().name, d)).collect::<HashMap<_,_>>()
+    COMMAND_LIST.iter().map(|&d| (d.info().name, d)).collect()
 );

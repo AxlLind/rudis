@@ -12,9 +12,9 @@ static INFO: CommandInfo = CommandInfo {
 };
 
 
-pub struct DecrbyCommand;
+pub struct Cmd;
 
-impl RedisCommand for DecrbyCommand {
+impl RedisCommand for Cmd {
     fn info(&self) -> &'static CommandInfo { &INFO }
 
     fn run(&self, db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
