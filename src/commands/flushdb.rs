@@ -3,7 +3,7 @@ use crate::command::Command;
 use crate::{ByteString, Database, Response};
 
 static INFO: CommandInfo = CommandInfo {
-    name: b"flushall",
+    name: b"flushdb",
     arity: 0,
     flags: &[],
     first_key: 1,
@@ -11,9 +11,9 @@ static INFO: CommandInfo = CommandInfo {
     step: 5,
 };
 
-pub struct FlushallCommand;
+pub struct FlushdbCommand;
 
-impl RedisCommand for FlushallCommand {
+impl RedisCommand for FlushdbCommand {
     fn info(&self) -> &'static CommandInfo { &INFO }
 
     fn run(&self, db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {

@@ -19,6 +19,7 @@ register_commands!(
     del::DelCommand,
     exists::ExistsCommand,
     flushall::FlushallCommand,
+    flushdb::FlushdbCommand,
     get::GetCommand,
     getdel::GetdelCommand,
     getset::GetsetCommand,
