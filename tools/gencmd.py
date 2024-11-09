@@ -1,9 +1,11 @@
+#!/usr/bin/python3
 import argparse
 import json
 import subprocess
 from pathlib import Path
+from typing import Any
 
-CMD_DIR = Path(__file__).parent / 'src' / 'commands'
+REPO_ROOT = (Path(__file__).parent / '..').resolve()
 
 SRC = """
 use super::{{CommandInfo, RedisCommand}};
@@ -30,24 +32,42 @@ impl RedisCommand for Cmd {{
 }}
 """.lstrip()
 
-parser = argparse.ArgumentParser()
-parser.add_argument('cmds', nargs='*', help='instantiate one or more commands (none means all)')
-opts = parser.parse_args()
 
-res = subprocess.run(['redis-cli', '--json', 'command'], stdout=subprocess.PIPE, text=True, check=True)
-command_info = sorted(json.loads(res.stdout), key=lambda cmd: cmd[0])
-for name, arity, flags, first_key, last_key, step, *_ in command_info:
-    if opts.cmds and name not in opts.cmds:
-        continue
-    print(f'instantiating command "{name}"')
-    flags = '\n        '.join(f'b"{f}",' for f in flags)
+def instantiate_cmd(info: list[Any]) -> None:
+    name, arity, flags, first_key, last_key, step, *_ = info
+    f = REPO_ROOT / 'src' / 'commands' / f'{name}.rs'
+    print(f'instantiating: {f.relative_to(REPO_ROOT)}')
+    flags = "\n        ".join(f'b"{f}",' for f in flags)
     if flags:
         flags = f'\n        {flags}\n    '
-    (CMD_DIR / f'{name}.rs').write_text(SRC.format(
-        name=name,
-        arity=arity,
-        flags=flags,
-        first_key=first_key,
-        last_key=last_key,
-        step=step,
-    ))
+    f.write_text(
+        SRC.format(
+            name=name,
+            arity=arity,
+            flags=flags,
+            first_key=first_key,
+            last_key=last_key,
+            step=step,
+        )
+    )
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('command', type=lambda s: s.lower(), help='command to instantiate')
+    opts = parser.parse_args()
+
+    res = subprocess.run(
+        ['redis-cli', '--json', 'command', 'info', opts.command],
+        stdout=subprocess.PIPE,
+        text=True,
+        check=True,
+    )
+    command_info = json.loads(res.stdout)[0]
+    if command_info is None:
+        raise Exception(f'invalid command "{opts.command}"')
+    instantiate_cmd(command_info)
+
+
+if __name__ == "__main__":
+    main()
