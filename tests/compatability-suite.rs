@@ -393,11 +393,13 @@ compatability_tests! {
     },
     test_scard_command: {
         commands: [
+            "scard myset",
             "sadd myset 0",
             "sadd myset 1",
             "scard myset",
         ],
         results: [
+            0,
             1,
             1,
             2,
