@@ -61,11 +61,10 @@ pub struct CommandInfo {
 }
 
 pub trait RedisCommand: Send + Sync {
-    fn name(&self) -> &'static [u8];
     fn info(&self) -> &'static CommandInfo;
     fn run(&self, db: &mut Database, cmd: Command) -> anyhow::Result<Response>;
 }
 
 pub static COMMANDS: LazyLock<HashMap<&[u8], &dyn RedisCommand>> = LazyLock::new(||
-    COMMAND_LIST.iter().map(|&d| (d.name(), d)).collect::<HashMap<_,_>>()
+    COMMAND_LIST.iter().map(|&d| (d.info().name, d)).collect::<HashMap<_,_>>()
 );

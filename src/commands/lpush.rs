@@ -14,8 +14,6 @@ static INFO: CommandInfo = CommandInfo {
 pub struct LpushCommand;
 
 impl RedisCommand for LpushCommand {
-    fn name(&self) -> &'static [u8] { INFO.name }
-
     fn info(&self) -> &'static CommandInfo { &INFO }
 
     fn run(&self, db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {

@@ -14,8 +14,6 @@ static INFO: CommandInfo = CommandInfo {
 pub struct RenamenxCommand;
 
 impl RedisCommand for RenamenxCommand {
-    fn name(&self) -> &'static [u8] { INFO.name }
-
     fn info(&self) -> &'static CommandInfo { &INFO }
 
     fn run(&self, db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {

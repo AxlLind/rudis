@@ -14,8 +14,6 @@ static INFO: CommandInfo = CommandInfo {
 pub struct PingCommand;
 
 impl RedisCommand for PingCommand {
-    fn name(&self) -> &'static [u8] { INFO.name }
-
     fn info(&self) -> &'static CommandInfo { &INFO }
 
     fn run(&self, _: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
