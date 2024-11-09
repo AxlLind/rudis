@@ -9,7 +9,6 @@ pub use commands::COMMANDS;
 
 pub type ByteString = Vec<u8>;
 
-#[allow(unused)] // TODO: remove this
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Value {
     String(ByteString),
@@ -49,6 +48,14 @@ impl Database {
         match self.get(key) {
             Some(Value::Array(v)) => Ok(Some(v)),
             Some(_) => anyhow::bail!("expected list value"),
+            None => Ok(None)
+        }
+    }
+
+    pub fn get_set(&mut self, key: &[u8]) -> anyhow::Result<Option<&mut HashSet<ByteString>>> {
+        match self.get(key) {
+            Some(Value::Set(v)) => Ok(Some(v)),
+            Some(_) => anyhow::bail!("expected set value"),
             None => Ok(None)
         }
     }

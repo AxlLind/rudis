@@ -64,6 +64,7 @@ register_commands!(
     rename,
     renamenx,
     rpush,
+    sadd,
     set,
     strlen,
     type_,

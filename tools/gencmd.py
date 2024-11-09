@@ -26,7 +26,7 @@ pub struct Cmd;
 impl RedisCommand for Cmd {{
     fn info(&self) -> &'static CommandInfo {{ &INFO }}
 
-    fn run(&self, _: &mut Database, _: Command) -> anyhow::Result<Response> {{
+    fn run(&self, db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {{
         todo!()
     }}
 }}
