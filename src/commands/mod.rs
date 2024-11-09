@@ -66,6 +66,7 @@ register_commands!(
     rpush,
     sadd,
     set,
+    sismember,
     strlen,
     type_,
     unlink,
