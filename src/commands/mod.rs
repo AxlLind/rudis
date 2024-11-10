@@ -67,6 +67,7 @@ register_commands!(
     sadd,
     scard,
     sdiff,
+    sdiffstore,
     set,
     sismember,
     smembers,
