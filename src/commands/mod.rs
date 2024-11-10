@@ -75,6 +75,7 @@ register_commands!(
     sismember,
     smembers,
     smove,
+    srem,
     strlen,
     type_,
     unlink,

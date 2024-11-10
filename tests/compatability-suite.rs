@@ -663,16 +663,16 @@ compatability_tests! {
     },
     test_srem_command: {
         commands: [
-            "sadd myset 0",
-            "sadd myset 1",
-            "srem myset 0",
+            "sadd myset 0 1 2",
+            "srem myset 0 3 4",
             "srem myset 2",
+            "scard myset",
         ],
         results: [
+            3,
             1,
             1,
             1,
-            0,
         ],
         since: "1.0.0",
     },
