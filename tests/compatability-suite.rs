@@ -528,6 +528,27 @@ compatability_tests! {
         ],
         since: "1.0.0",
     },
+    test_sintercard_command: {
+        commands: [
+            "sadd myset 0",
+            "sadd myset 1",
+            "sadd myset 2",
+            "sadd myset1 1",
+            "sadd myset1 2",
+            "sadd myset1 3",
+            "sintercard myset myset1",
+        ],
+        results: [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            2,
+        ],
+        since: "1.0.0",
+    },
     test_sinterstore_command: {
         commands: [
             "sadd myset1 0",

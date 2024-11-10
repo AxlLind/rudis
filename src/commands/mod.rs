@@ -70,6 +70,7 @@ register_commands!(
     sdiffstore,
     set,
     sinter,
+    sintercard,
     sismember,
     smembers,
     strlen,
