@@ -3,8 +3,8 @@ use std::io::Write;
 
 mod cmd_parser;
 mod commands;
-pub use cmd_parser::{Parser, Command};
 use commands::CommandInfo;
+pub use cmd_parser::{Parser, Command};
 pub use commands::COMMANDS;
 
 pub type ByteString = Vec<u8>;
@@ -83,7 +83,7 @@ pub fn escape_bytes(bytes: &[u8]) -> String {
 
 pub fn execute_command(db: &mut Database, cmd: Command) -> anyhow::Result<Response> {
     match COMMANDS.get(cmd.cmd().as_bytes()) {
-        Some(command) => command.run(db, cmd),
+        Some(command) => command(db, cmd),
         None => anyhow::bail!("Unrecognized command: {:?}", cmd.cmd()),
     }
 }

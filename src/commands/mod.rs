@@ -29,15 +29,19 @@ pub struct CommandInfo {
     pub step: i64,
 }
 
-pub trait RedisCommand: Send + Sync {
-    fn info(&self) -> &'static CommandInfo;
-    fn run(&self, db: &mut Database, cmd: Command) -> anyhow::Result<Response>;
-}
+type CommandFn = fn(&mut Database, Command) -> anyhow::Result<Response>;
 
 macro_rules! register_commands {
     ($($command:ident,)+) => {
         $(mod $command;)+
-        pub const COMMAND_LIST: &[&dyn RedisCommand] = &[$(&$command::Cmd as _),+];
+
+        pub static COMMAND_LIST: &[(CommandFn, &CommandInfo)] = &[$(($command::run, &$command::INFO)),+];
+
+        pub static COMMANDS: LazyLock<HashMap<&[u8], CommandFn>> = LazyLock::new(|| {
+            let mut commands = HashMap::new();
+            $(commands.insert($command::INFO.name, $command::run as _);)+
+            commands
+        });
     };
 }
 register_commands!(
@@ -85,8 +89,4 @@ register_commands!(
     time,
     type_,
     unlink,
-);
-
-pub static COMMANDS: LazyLock<HashMap<&[u8], &dyn RedisCommand>> = LazyLock::new(||
-    COMMAND_LIST.iter().map(|&d| (d.info().name, d)).collect()
 );

@@ -8,11 +8,11 @@ from typing import Any
 REPO_ROOT = (Path(__file__).parent / '..').resolve()
 
 SRC = """
-use super::{{CommandInfo, RedisCommand}};
+use super::CommandInfo;
 use crate::cmd_parser::Command;
 use crate::{{ByteString, Database, Response, Value}};
 
-static INFO: CommandInfo = CommandInfo {{
+pub static INFO: CommandInfo = CommandInfo {{
     name: b"{name}",
     arity: {arity},
     flags: &[{flags}],
@@ -21,14 +21,8 @@ static INFO: CommandInfo = CommandInfo {{
     step: {step},
 }};
 
-pub struct Cmd;
-
-impl RedisCommand for Cmd {{
-    fn info(&self) -> &'static CommandInfo {{ &INFO }}
-
-    fn run(&self, db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {{
-        todo!()
-    }}
+pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {{
+    todo!()
 }}
 """.lstrip()
 

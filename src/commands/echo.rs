@@ -1,8 +1,8 @@
-use super::{CommandInfo, RedisCommand};
+use super::CommandInfo;
 use crate::cmd_parser::Command;
 use crate::{ByteString, Database, Response};
 
-static INFO: CommandInfo = CommandInfo {
+pub static INFO: CommandInfo = CommandInfo {
     name: b"echo",
     arity: 2,
     flags: &[
@@ -15,13 +15,7 @@ static INFO: CommandInfo = CommandInfo {
     step: 0,
 };
 
-pub struct Cmd;
-
-impl RedisCommand for Cmd {
-    fn info(&self) -> &'static CommandInfo { &INFO }
-
-    fn run(&self, _: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
-        let msg = cmd.parse_args::<ByteString>()?;
-        Ok(Response::String(msg))
-    }
+pub fn run(_: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
+    let msg = cmd.parse_args::<ByteString>()?;
+    Ok(Response::String(msg))
 }

@@ -1,8 +1,8 @@
-use super::{CommandInfo, RedisCommand};
+use super::CommandInfo;
 use crate::cmd_parser::Command;
 use crate::{Database, Response};
 
-static INFO: CommandInfo = CommandInfo {
+pub static INFO: CommandInfo = CommandInfo {
     name: b"quit",
     arity: -1,
     flags: &[
@@ -18,12 +18,6 @@ static INFO: CommandInfo = CommandInfo {
     step: 0,
 };
 
-pub struct Cmd;
-
-impl RedisCommand for Cmd {
-    fn info(&self) -> &'static CommandInfo { &INFO }
-
-    fn run(&self, _: &mut Database, _: Command) -> anyhow::Result<Response> {
-        unreachable!()
-    }
+pub fn run(_: &mut Database, _: Command) -> anyhow::Result<Response> {
+    unreachable!()
 }

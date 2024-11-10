@@ -1,8 +1,8 @@
-use super::{incr_by, CommandInfo, RedisCommand};
+use super::{incr_by, CommandInfo};
 use crate::cmd_parser::Command;
 use crate::{ByteString, Database, Response};
 
-static INFO: CommandInfo = CommandInfo {
+pub static INFO: CommandInfo = CommandInfo {
     name: b"incr",
     arity: 2,
     flags: &[
@@ -15,13 +15,7 @@ static INFO: CommandInfo = CommandInfo {
     step: 1,
 };
 
-pub struct Cmd;
-
-impl RedisCommand for Cmd {
-    fn info(&self) -> &'static CommandInfo { &INFO }
-
-    fn run(&self, db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
-        let key = cmd.parse_args::<ByteString>()?;
-        incr_by(db, key, 1)
-    }
+pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
+    let key = cmd.parse_args::<ByteString>()?;
+    incr_by(db, key, 1)
 }
