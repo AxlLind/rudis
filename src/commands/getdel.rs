@@ -15,14 +15,25 @@ pub static INFO: CommandInfo = CommandInfo {
 };
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
-    let (src, dst) = cmd.parse_args::<(ByteString, ByteString)>()?;
-    let value = match db.get(&src) {
-        Some(v) => {
-            let copy = v.clone();
-            db.set(dst, copy);
-            Response::Number(1)
-        }
-        None => Response::Number(0),
-    };
-    Ok(value)
+    let key = cmd.parse_args::<ByteString>()?;
+    Ok(match db.get_str(&key)?.cloned() {
+        Some(s) => {
+            db.del(&key);
+            Response::String(s)
+        },
+        None => Response::Nil,
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_getdel
+        "getdel x" => ();
+        "set x 0"  => "OK";
+        "getdel x" => "0";
+        "exists x" => 0;
+    }
 }
