@@ -1,9 +1,9 @@
 use std::collections::{HashMap, HashSet};
 use std::io::Write;
 
-mod command;
+mod cmd_parser;
 mod commands;
-pub use command::{Parser, Command};
+pub use cmd_parser::{Parser, Command};
 use commands::CommandInfo;
 pub use commands::COMMANDS;
 

@@ -1,5 +1,5 @@
 use super::{CommandInfo, RedisCommand};
-use crate::command::Command;
+use crate::cmd_parser::Command;
 use crate::{Value, ByteString, Database, Response};
 
 static INFO: CommandInfo = CommandInfo {

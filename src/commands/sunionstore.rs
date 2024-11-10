@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use super::{CommandInfo, RedisCommand};
-use crate::command::Command;
+use crate::cmd_parser::Command;
 use crate::{ByteString, Database, Response, Value};
 
 static INFO: CommandInfo = CommandInfo {
