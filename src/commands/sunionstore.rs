@@ -1,12 +1,15 @@
+use std::collections::HashSet;
+
 use super::{CommandInfo, RedisCommand};
 use crate::command::Command;
-use crate::{ByteString, Database, Response};
+use crate::{ByteString, Database, Response, Value};
 
 static INFO: CommandInfo = CommandInfo {
-    name: b"sunion",
-    arity: -2,
+    name: b"sunionstore",
+    arity: -3,
     flags: &[
-        b"readonly",
+        b"write",
+        b"denyoom",
     ],
     first_key: 1,
     last_key: -1,
@@ -20,17 +23,20 @@ impl RedisCommand for Cmd {
 
     fn run(&self, db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         let (key, keys) = cmd.parse_args::<(ByteString, Vec<ByteString>)>()?;
-        let Some(mut set) = db.get_set(&key)?.cloned() else { return Ok(Response::Array(Vec::new())) };
-        for k in keys {
-            let Some(s) = db.get_set(&k)? else { continue };
+        let Some(mut set) = db.get_set(&keys[0])?.cloned() else {
+            db.set(key, Value::Set(HashSet::new()));
+            return Ok(Response::Number(0));
+        };
+        for k in &keys[1..] {
+            let Some(s) = db.get_set(k)? else { continue };
             for m in s.iter() {
                 if !set.contains(m) {
                     set.insert(m.clone());
                 }
             }
         }
-        let mut elems = set.into_iter().collect::<Vec<_>>();
-        elems.sort();
-        Ok(Response::Array(elems))
+        let len = set.len();
+        db.set(key, Value::Set(set));
+        Ok(Response::Number(len as _))
     }
 }

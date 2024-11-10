@@ -78,6 +78,7 @@ register_commands!(
     srem,
     strlen,
     sunion,
+    sunionstore,
     type_,
     unlink,
 );
