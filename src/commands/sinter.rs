@@ -39,5 +39,6 @@ mod tests {
         "sinter x y z" => ["3"];
         "sinter x y"   => ["2", "3"];
         "sinter y x"   => ["2", "3"];
+        "sinter q"     => [];
     }
 }
