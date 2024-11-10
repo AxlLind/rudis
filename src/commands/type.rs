@@ -25,3 +25,20 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     };
     Ok(Response::String(t.to_vec()))
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_type
+        "type x" => "none";
+        "set x 0" => "OK";
+        "type x" => "string";
+        "rpush y 1" => 1;
+        "type y" => "list";
+        "sadd z 1" => 1;
+        "type z" => "set";
+        // TODO: add test for hash
+    }
+}
