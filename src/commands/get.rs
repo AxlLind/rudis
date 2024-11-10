@@ -21,3 +21,15 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         None => Response::Nil,
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_get
+        "set mykey 10" => "OK";
+        "get mykey"    => "10";
+        "get x"        => ();
+    }
+}
