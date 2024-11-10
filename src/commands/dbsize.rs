@@ -18,3 +18,17 @@ pub fn run(db: &mut Database, cmd: Command) -> anyhow::Result<Response> {
     anyhow::ensure!(!cmd.has_more(), "got extra arguments");
     Ok(Response::Number(db.state.len() as _))
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_dbsize
+        "dbsize" => 0;
+        "set x 1" => "OK";
+        "dbsize" => 1;
+        "set y 2" => "OK";
+        "dbsize" => 2;
+    }
+}
