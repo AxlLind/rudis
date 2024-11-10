@@ -19,3 +19,21 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     anyhow::ensure!(!keys.is_empty(), "expected UNLINK key [key ...]");
     Ok(Response::Number(keys.iter().filter(|&key| db.del(key).is_some()).count() as _))
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_unlink
+        "set x 0" => "OK";
+        "set y 0" => "OK";
+        "set z 0" => "OK";
+        "exists x y z" => 3;
+        "unlink x y"   => 2;
+        "exists x y"   => 0;
+        "unlink a b c" => 0;
+        "unlink z a"   => 1;
+        "exists z"     => 0;
+    }
+}
