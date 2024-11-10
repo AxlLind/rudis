@@ -77,6 +77,7 @@ register_commands!(
     smove,
     srem,
     strlen,
+    sunion,
     type_,
     unlink,
 );
