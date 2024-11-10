@@ -19,3 +19,15 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let len = db.get_list(&key)?.map(|l| l.len()).unwrap_or(0);
     Ok(Response::Number(len as _))
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_llen
+        "llen x"        => 0;
+        "rpush x 1 2 3" => 3;
+        "llen x"        => 3;
+    }
+}
