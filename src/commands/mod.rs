@@ -45,244 +45,244 @@ macro_rules! register_commands {
     };
 }
 register_commands! {
-    acl,
+    acl,                  // unimplemented
     append,
-    asking,
-    auth,
-    bgrewriteaof,
-    bgsave,
-    bitcount,
-    bitfield_ro,
-    bitfield,
-    bitop,
-    bitpos,
-    blmove,
-    blmpop,
-    blpop,
-    brpop,
-    brpoplpush,
-    bzmpop,
-    bzpopmax,
-    bzpopmin,
-    client,
-    cluster,
+    asking,               // unimplemented
+    auth,                 // unimplemented
+    bgrewriteaof,         // unimplemented
+    bgsave,               // unimplemented
+    bitcount,             // unimplemented
+    bitfield_ro,          // unimplemented
+    bitfield,             // unimplemented
+    bitop,                // unimplemented
+    bitpos,               // unimplemented
+    blmove,               // unimplemented
+    blmpop,               // unimplemented
+    blpop,                // unimplemented
+    brpop,                // unimplemented
+    brpoplpush,           // unimplemented
+    bzmpop,               // unimplemented
+    bzpopmax,             // unimplemented
+    bzpopmin,             // unimplemented
+    client,               // unimplemented
+    cluster,              // unimplemented
     command,
-    config,
+    config,               // unimplemented
     copy,
     dbsize,
-    debug,
+    debug,                // unimplemented
     decr,
     decrby,
     del,
-    discard,
-    dump,
+    discard,              // unimplemented
+    dump,                 // unimplemented
     echo,
-    eval_ro,
-    eval,
-    evalsha_ro,
-    evalsha,
-    exec,
+    eval_ro,              // unimplemented
+    eval,                 // unimplemented
+    evalsha_ro,           // unimplemented
+    evalsha,              // unimplemented
+    exec,                 // unimplemented
     exists,
-    expire,
-    expireat,
-    expiretime,
-    failover,
-    fcall_ro,
-    fcall,
+    expire,               // unimplemented
+    expireat,             // unimplemented
+    expiretime,           // unimplemented
+    failover,             // unimplemented
+    fcall_ro,             // unimplemented
+    fcall,                // unimplemented
     flushall,
     flushdb,
-    function,
-    geoadd,
-    geodist,
-    geohash,
-    geopos,
-    georadius_ro,
-    georadius,
-    georadiusbymember_ro,
-    georadiusbymember,
-    geosearch,
-    geosearchstore,
+    function,             // unimplemented
+    geoadd,               // unimplemented
+    geodist,              // unimplemented
+    geohash,              // unimplemented
+    geopos,               // unimplemented
+    georadius_ro,         // unimplemented
+    georadius,            // unimplemented
+    georadiusbymember_ro, // unimplemented
+    georadiusbymember,    // unimplemented
+    geosearch,            // unimplemented
+    geosearchstore,       // unimplemented
     get,
-    getbit,
+    getbit,               // unimplemented
     getdel,
-    getex,
-    getrange,
+    getex,                // unimplemented
+    getrange,             // unimplemented
     getset,
-    hdel,
-    hello,
-    hexists,
-    hget,
-    hgetall,
-    hincrby,
-    hincrbyfloat,
-    hkeys,
-    hlen,
-    hmget,
-    hmset,
-    hrandfield,
-    hscan,
-    hset,
-    hsetnx,
-    hstrlen,
-    hvals,
+    hdel,                 // unimplemented
+    hello,                // unimplemented
+    hexists,              // unimplemented
+    hget,                 // unimplemented
+    hgetall,              // unimplemented
+    hincrby,              // unimplemented
+    hincrbyfloat,         // unimplemented
+    hkeys,                // unimplemented
+    hlen,                 // unimplemented
+    hmget,                // unimplemented
+    hmset,                // unimplemented
+    hrandfield,           // unimplemented
+    hscan,                // unimplemented
+    hset,                 // unimplemented
+    hsetnx,               // unimplemented
+    hstrlen,              // unimplemented
+    hvals,                // unimplemented
     incr,
     incrby,
-    incrbyfloat,
-    info,
-    keys,
-    lastsave,
-    latency,
-    lcs,
-    lindex,
-    linsert,
+    incrbyfloat,          // unimplemented
+    info,                 // unimplemented
+    keys,                 // unimplemented
+    lastsave,             // unimplemented
+    latency,              // unimplemented
+    lcs,                  // unimplemented
+    lindex,               // unimplemented
+    linsert,              // unimplemented
     llen,
-    lmove,
-    lmpop,
-    lolwut,
+    lmove,                // unimplemented
+    lmpop,                // unimplemented
+    lolwut,               // unimplemented
     lpop,
-    lpos,
+    lpos,                 // unimplemented
     lpush,
-    lpushx,
+    lpushx,               // unimplemented
     lrange,
-    lrem,
-    lset,
-    ltrim,
-    memory,
-    mget,
-    migrate,
-    module,
-    monitor,
+    lrem,                 // unimplemented
+    lset,                 // unimplemented
+    ltrim,                // unimplemented
+    memory,               // unimplemented
+    mget,                 // unimplemented
+    migrate,              // unimplemented
+    module,               // unimplemented
+    monitor,              // unimplemented
     r#move,
-    mset,
-    msetnx,
-    multi,
-    object,
-    persist,
-    pexpire,
-    pexpireat,
-    pexpiretime,
-    pfadd,
-    pfcount,
-    pfdebug,
-    pfmerge,
-    pfselftest,
+    mset,                 // unimplemented
+    msetnx,               // unimplemented
+    multi,                // unimplemented
+    object,               // unimplemented
+    persist,              // unimplemented
+    pexpire,              // unimplemented
+    pexpireat,            // unimplemented
+    pexpiretime,          // unimplemented
+    pfadd,                // unimplemented
+    pfcount,              // unimplemented
+    pfdebug,              // unimplemented
+    pfmerge,              // unimplemented
+    pfselftest,           // unimplemented
     ping,
-    psetex,
-    psubscribe,
-    psync,
-    pttl,
-    publish,
-    pubsub,
-    punsubscribe,
+    psetex,               // unimplemented
+    psubscribe,           // unimplemented
+    psync,                // unimplemented
+    pttl,                 // unimplemented
+    publish,              // unimplemented
+    pubsub,               // unimplemented
+    punsubscribe,         // unimplemented
     quit,
-    randomkey,
-    readonly,
-    readwrite,
+    randomkey,            // unimplemented
+    readonly,             // unimplemented
+    readwrite,            // unimplemented
     rename,
     renamenx,
-    replconf,
-    replicaof,
-    reset,
-    restore_asking,
-    restore,
-    role,
+    replconf,             // unimplemented
+    replicaof,            // unimplemented
+    reset,                // unimplemented
+    restore_asking,       // unimplemented
+    restore,              // unimplemented
+    role,                 // unimplemented
     rpop,
-    rpoplpush,
+    rpoplpush,            // unimplemented
     rpush,
-    rpushx,
+    rpushx,               // unimplemented
     sadd,
-    save,
-    scan,
+    save,                 // unimplemented
+    scan,                 // unimplemented
     scard,
-    script,
+    script,               // unimplemented
     sdiff,
     sdiffstore,
-    select,
+    select,               // unimplemented
     set,
-    setbit,
-    setex,
-    setnx,
-    setrange,
-    shutdown,
+    setbit,               // unimplemented
+    setex,                // unimplemented
+    setnx,                // unimplemented
+    setrange,             // unimplemented
+    shutdown,             // unimplemented
     sinter,
     sintercard,
     sinterstore,
     sismember,
-    slaveof,
-    slowlog,
+    slaveof,              // unimplemented
+    slowlog,              // unimplemented
     smembers,
-    smismember,
+    smismember,           // unimplemented
     smove,
-    sort_ro,
-    sort,
-    spop,
-    spublish,
-    srandmember,
+    sort_ro,              // unimplemented
+    sort,                 // unimplemented
+    spop,                 // unimplemented
+    spublish,             // unimplemented
+    srandmember,          // unimplemented
     srem,
-    sscan,
-    ssubscribe,
+    sscan,                // unimplemented
+    ssubscribe,           // unimplemented
     strlen,
-    subscribe,
-    substr,
+    subscribe,            // unimplemented
+    substr,               // unimplemented
     sunion,
     sunionstore,
-    sunsubscribe,
-    swapdb,
-    sync,
+    sunsubscribe,         // unimplemented
+    swapdb,               // unimplemented
+    sync,                 // unimplemented
     time,
-    touch,
-    ttl,
+    touch,                // unimplemented
+    ttl,                  // unimplemented
     r#type,
     unlink,
-    unsubscribe,
-    unwatch,
-    wait,
-    watch,
-    xack,
-    xadd,
-    xautoclaim,
-    xclaim,
-    xdel,
-    xgroup,
-    xinfo,
-    xlen,
-    xpending,
-    xrange,
-    xread,
-    xreadgroup,
-    xrevrange,
-    xsetid,
-    xtrim,
-    zadd,
-    zcard,
-    zcount,
-    zdiff,
-    zdiffstore,
-    zincrby,
-    zinter,
-    zintercard,
-    zinterstore,
-    zlexcount,
-    zmpop,
-    zmscore,
-    zpopmax,
-    zpopmin,
-    zrandmember,
-    zrange,
-    zrangebylex,
-    zrangebyscore,
-    zrangestore,
-    zrank,
-    zrem,
-    zremrangebylex,
-    zremrangebyrank,
-    zremrangebyscore,
-    zrevrange,
-    zrevrangebylex,
-    zrevrangebyscore,
-    zrevrank,
-    zscan,
-    zscore,
-    zunion,
-    zunionstore,
+    unsubscribe,          // unimplemented
+    unwatch,              // unimplemented
+    wait,                 // unimplemented
+    watch,                // unimplemented
+    xack,                 // unimplemented
+    xadd,                 // unimplemented
+    xautoclaim,           // unimplemented
+    xclaim,               // unimplemented
+    xdel,                 // unimplemented
+    xgroup,               // unimplemented
+    xinfo,                // unimplemented
+    xlen,                 // unimplemented
+    xpending,             // unimplemented
+    xrange,               // unimplemented
+    xread,                // unimplemented
+    xreadgroup,           // unimplemented
+    xrevrange,            // unimplemented
+    xsetid,               // unimplemented
+    xtrim,                // unimplemented
+    zadd,                 // unimplemented
+    zcard,                // unimplemented
+    zcount,               // unimplemented
+    zdiff,                // unimplemented
+    zdiffstore,           // unimplemented
+    zincrby,              // unimplemented
+    zinter,               // unimplemented
+    zintercard,           // unimplemented
+    zinterstore,          // unimplemented
+    zlexcount,            // unimplemented
+    zmpop,                // unimplemented
+    zmscore,              // unimplemented
+    zpopmax,              // unimplemented
+    zpopmin,              // unimplemented
+    zrandmember,          // unimplemented
+    zrange,               // unimplemented
+    zrangebylex,          // unimplemented
+    zrangebyscore,        // unimplemented
+    zrangestore,          // unimplemented
+    zrank,                // unimplemented
+    zrem,                 // unimplemented
+    zremrangebylex,       // unimplemented
+    zremrangebyrank,      // unimplemented
+    zremrangebyscore,     // unimplemented
+    zrevrange,            // unimplemented
+    zrevrangebylex,       // unimplemented
+    zrevrangebyscore,     // unimplemented
+    zrevrank,             // unimplemented
+    zscan,                // unimplemented
+    zscore,               // unimplemented
+    zunion,               // unimplemented
+    zunionstore,          // unimplemented
 }
