@@ -71,6 +71,7 @@ register_commands!(
     set,
     sinter,
     sintercard,
+    sinterstore,
     sismember,
     smembers,
     strlen,
