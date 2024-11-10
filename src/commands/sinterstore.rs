@@ -30,3 +30,21 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     db.set(key, Value::Set(set));
     Ok(Response::Number(len as _))
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_sinterstore
+        "sadd x 1 2 3" => 3;
+        "sadd y 2 3 4" => 3;
+        "sadd z 3 4 5" => 3;
+        "sinterstore r x"     => 3;
+        "sinterstore r x z"   => 1;
+        "sinterstore r x y z" => 1;
+        "sinterstore r x y"   => 2;
+        "sinterstore r y x"   => 2;
+        "sinterstore r q"     => 0;
+    }
+}
