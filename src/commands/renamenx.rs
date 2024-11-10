@@ -16,12 +16,29 @@ pub static INFO: CommandInfo = CommandInfo {
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, newkey) = cmd.parse_args::<(ByteString, ByteString)>()?;
-    let val = db.del(&key).ok_or(anyhow::anyhow!("key does not exist"))?;
     let n = if db.contains(&newkey) {
         0
     } else {
+        let val = db.del(&key).ok_or(anyhow::anyhow!("key does not exist"))?;
         db.set(newkey, val);
         1
     };
     Ok(Response::Number(n))
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_renamenx
+        "set x 0"      => "OK";
+        "renamenx x y" => 1;
+        "exists x"     => 0;
+        "get y"        => "0";
+        "set x 1"      => "OK";
+        "renamenx y x" => 0;
+        "get x"        => "1";
+        "renamenx x x" => 0;
+    }
 }
