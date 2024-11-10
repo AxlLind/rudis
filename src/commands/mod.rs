@@ -82,6 +82,7 @@ register_commands!(
     strlen,
     sunion,
     sunionstore,
+    time,
     type_,
     unlink,
 );

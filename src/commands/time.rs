@@ -1,0 +1,31 @@
+use std::time::{SystemTime, UNIX_EPOCH};
+use super::{CommandInfo, RedisCommand};
+use crate::cmd_parser::Command;
+use crate::{Database, Response};
+
+static INFO: CommandInfo = CommandInfo {
+    name: b"time",
+    arity: 1,
+    flags: &[
+        b"loading",
+        b"stale",
+        b"fast",
+    ],
+    first_key: 0,
+    last_key: 0,
+    step: 0,
+};
+
+pub struct Cmd;
+
+impl RedisCommand for Cmd {
+    fn info(&self) -> &'static CommandInfo { &INFO }
+
+    fn run(&self, _: &mut Database, cmd: Command) -> anyhow::Result<Response> {
+        anyhow::ensure!(!cmd.has_more(), "unexpected arguments");
+        let t = SystemTime::now().duration_since(UNIX_EPOCH).expect("now is later than unix epoch");
+        let s = t.as_secs().to_string().into_bytes();
+        let ms = t.subsec_micros().to_string().into_bytes();
+        Ok(Response::Array([s, ms].to_vec()))
+    }
+}
