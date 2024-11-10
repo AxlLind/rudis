@@ -62,6 +62,7 @@ register_commands!(
     lpush,
     lrange,
     ping,
+    quit,
     rename,
     renamenx,
     rpop,

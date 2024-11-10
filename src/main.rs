@@ -15,6 +15,9 @@ fn main() -> anyhow::Result<()> {
             let r = match parser.read_command() {
                 Ok(cmd) => {
                     println!("Got command: {}", cmd);
+                    if cmd.cmd() == "quit" {
+                        break;
+                    }
                     execute_command(&mut db, cmd)
                 },
                 Err(e) => Err(e),
