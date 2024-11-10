@@ -19,3 +19,17 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let card = db.get_set(&key)?.map(|s| s.len()).unwrap_or(0);
     Ok(Response::Number(card as _))
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_scard
+        "scard x"      => 0;
+        "sadd x 1 2 3" => 3;
+        "scard x"      => 3;
+        "sadd x 4"     => 1;
+        "scard x"      => 4;
+    }
+}
