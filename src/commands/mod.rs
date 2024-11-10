@@ -63,6 +63,7 @@ register_commands!(
     ping,
     rename,
     renamenx,
+    rpop,
     rpush,
     sadd,
     scard,

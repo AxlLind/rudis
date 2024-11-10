@@ -3,7 +3,7 @@ use crate::command::Command;
 use crate::{ByteString, Database, Response};
 
 static INFO: CommandInfo = CommandInfo {
-    name: b"lpop",
+    name: b"rpop",
     arity: -2,
     flags: &[
         b"write",
@@ -26,11 +26,9 @@ impl RedisCommand for Cmd {
             Some(n) if n < 0 => anyhow::bail!("value is out of range, must be positive"),
             Some(n) => {
                 let n = list.len().min(n as _);
-                let mut x = list.split_off(n);
-                std::mem::swap(&mut x, list);
-                Response::Array(x)
+                Response::Array(list.split_off(n))
             }
-            None => if list.is_empty() { Response::Nil } else { Response::String(list.remove(0)) },
+            None => list.pop().map(|v| Response::String(v)).unwrap_or(Response::Nil),
         })
     }
 }
