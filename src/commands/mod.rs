@@ -66,6 +66,7 @@ register_commands!(
     rpush,
     sadd,
     scard,
+    sdiff,
     set,
     sismember,
     smembers,
