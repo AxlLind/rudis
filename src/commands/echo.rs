@@ -19,3 +19,14 @@ pub fn run(_: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let msg = cmd.parse_args::<ByteString>()?;
     Ok(Response::String(msg))
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_echo
+        "echo hello" => "hello";
+        "echo HELLO" => "HELLO";
+    }
+}
