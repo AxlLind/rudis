@@ -19,3 +19,19 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let is_member = db.get_set(&key)?.map(|s| s.contains(&member)).unwrap_or(false);
     Ok(Response::Number(is_member as _))
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_sismember
+        "sadd x 1 2 3"    => 3;
+        "sismember x 1"   => 1;
+        "sismember x 2"   => 1;
+        "sismember x 3"   => 1;
+        "sismember x 4"   => 0;
+        "sismember x abc" => 0;
+        "sismember q 1"   => 0;
+    }
+}
