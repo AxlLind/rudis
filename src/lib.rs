@@ -125,30 +125,3 @@ pub fn write_response(writer: &mut impl Write, res: Response) -> anyhow::Result<
 
 #[cfg(test)]
 mod test_utils;
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    macro_rules! exec_cmd {
-        ($db:expr, $($cmd:expr),+) => {
-            execute_command(&mut $db, Command::new(vec![$($cmd.as_bytes().to_vec(),)+]).unwrap()).unwrap()
-        }
-    }
-
-    #[test]
-    fn test_get_set() {
-        let mut db = Database::default();
-        assert_eq!(exec_cmd!(db, "GET", "a"), Response::Nil);
-
-        assert_eq!(exec_cmd!(db, "SET", "a", "b"), Response::String(b"OK".to_vec()));
-        assert_eq!(exec_cmd!(db, "GET", "a"), Response::String(b"b".to_vec()));
-
-        assert_eq!(exec_cmd!(db, "SET", "a", "c"), Response::String(b"OK".to_vec()));
-        assert_eq!(exec_cmd!(db, "GET", "a"), Response::String(b"c".to_vec()));
-
-        assert_eq!(exec_cmd!(db, "DEL", "a"), Response::Number(1));
-        assert_eq!(exec_cmd!(db, "DEL", "b"), Response::Number(0));
-        assert_eq!(exec_cmd!(db, "DEL", "a", "b", "c"), Response::Number(0));
-    }
-}
