@@ -19,6 +19,14 @@ pub fn incr_by(db: &mut Database, key: ByteString, step: i64) -> anyhow::Result<
     Ok(Response::Number(val))
 }
 
+pub fn clamp_range(max: usize, start: i64, stop: i64) -> (usize, usize) {
+    fn clamp_index(max: usize, i: i64) -> usize {
+        let x = if i < 0 { max as i64 + i } else { i };
+        x.clamp(0, max as i64 - 1) as _
+    }
+    (clamp_index(max, start), clamp_index(max, stop))
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CommandInfo {
     pub name: &'static [u8],
