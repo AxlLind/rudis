@@ -31,3 +31,15 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_sadd
+        "sadd x 1 2 3" => 3;
+        "sadd x 1 2 3" => 0;
+        "sadd x 3 4" => 1;
+    }
+}
