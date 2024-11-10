@@ -24,3 +24,20 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     elems.sort();
     Ok(Response::Array(elems))
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_sinter
+        "sadd x 1 2 3" => 3;
+        "sadd y 2 3 4" => 3;
+        "sadd z 3 4 5" => 3;
+        "sinter x"     => ["1", "2", "3"];
+        "sinter x z"   => ["3"];
+        "sinter x y z" => ["3"];
+        "sinter x y"   => ["2", "3"];
+        "sinter y x"   => ["2", "3"];
+    }
+}
