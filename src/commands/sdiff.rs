@@ -26,3 +26,21 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     elems.sort();
     Ok(Response::Array(elems))
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_sdiff
+        "sadd x 1 2 3" => 3;
+        "sadd y 2 3 4" => 3;
+        "sadd z 3 4 5" => 3;
+        "sdiff x y"    => ["1"];
+        "sdiff x z"    => ["1", "2"];
+        "sdiff y x z"  => [];
+        "sdiff q"      => [];
+        "sdiff q x"    => [];
+        "sdiff x q"    => ["1", "2", "3"];
+    }
+}
