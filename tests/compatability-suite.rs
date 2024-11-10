@@ -29,8 +29,8 @@ impl AsResponse for Nil {
 }
 
 macro_rules! compatability_tests {
-    ($id:ident : { commands: [$($cmd:expr,)+], results: [$($res:expr,)+], since: $since:literal $(,)?}, $($rest:tt)*) => {
-        #[test]
+    ($($id:ident : { commands: [$($cmd:expr,)+], results: [$($res:expr,)+], since: $since:literal $(,)?},)+) => {
+        $(#[test]
         fn $id() -> anyhow::Result<()> {
             let mut db = Database::default();
             let results = [
@@ -42,8 +42,7 @@ macro_rules! compatability_tests {
             let expected = [$(AsResponse::as_response($res)),+];
             assert_eq!(results, expected);
             Ok(())
-        }
-        compatability_tests! { $($rest)* }
+        })+
     };
     () => {};
 }
