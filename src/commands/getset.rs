@@ -1,6 +1,6 @@
 use super::CommandInfo;
 use crate::cmd_parser::Command;
-use crate::{ByteString, Database, Response};
+use crate::{ByteString, Database, Response, Value};
 
 pub static INFO: CommandInfo = CommandInfo {
     name: b"getset",
@@ -18,7 +18,26 @@ pub static INFO: CommandInfo = CommandInfo {
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, value) = cmd.parse_args::<(ByteString, ByteString)>()?;
     Ok(match db.get_str(&key)? {
-        Some(s) => Response::String(std::mem::replace(s, value)),
-        None => Response::Nil,
+        Some(s) => {
+            let prev = std::mem::replace(s, value);
+            Response::String(prev)
+        },
+        None => {
+            db.set(key, Value::String(value));
+            Response::Nil
+        },
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_getset
+        "getset x 0" => ();
+        "get x"      => "0";
+        "getset x 1" => "0";
+        "get x"      => "1";
+    }
 }
