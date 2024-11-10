@@ -17,12 +17,10 @@ pub static INFO: CommandInfo = CommandInfo {
 };
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
-    let (key, keys) = cmd.parse_args::<(ByteString, Vec<ByteString>)>()?;
-    let Some(mut set) = db.get_set(&keys[0])?.cloned() else {
-        db.set(key, Value::Set(HashSet::new()));
-        return Ok(Response::Number(0));
-    };
-    for k in &keys[1..] {
+    let (dest, keys) = cmd.parse_args::<(ByteString, Vec<ByteString>)>()?;
+    anyhow::ensure!(!keys.is_empty(), "expected SUNION dest key [key ...]");
+    let mut set = HashSet::new();
+    for k in &keys {
         let Some(s) = db.get_set(k)? else { continue };
         for m in s.iter() {
             if !set.contains(m) {
@@ -31,6 +29,32 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         }
     }
     let len = set.len();
-    db.set(key, Value::Set(set));
+    db.set(dest, Value::Set(set));
     Ok(Response::Number(len as _))
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_sunionstore
+        "sadd x 1 2 3"        => 3;
+        "sadd y 2 3 4"        => 3;
+        "sadd z 3 4 5"        => 3;
+        "sunionstore r x"     => 3;
+        "smembers r"          => ["1", "2", "3"];
+        "sunionstore r x z"   => 5;
+        "smembers r"          => ["1", "2", "3", "4", "5"];
+        "sunionstore r x y z" => 5;
+        "smembers r"          => ["1", "2", "3", "4", "5"];
+        "sunionstore r x y"   => 4;
+        "smembers r"          => ["1", "2", "3", "4"];
+        "sunionstore r y z"   => 4;
+        "smembers r"          => ["2", "3", "4", "5"];
+        "sunionstore r q"     => 0;
+        "smembers r"          => [];
+        "sunionstore r q x"   => 3;
+        "smembers r"          => ["1", "2", "3"];
+    }
 }
