@@ -69,6 +69,7 @@ register_commands!(
     sdiff,
     sdiffstore,
     set,
+    sinter,
     sismember,
     smembers,
     strlen,
