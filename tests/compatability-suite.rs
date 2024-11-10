@@ -627,14 +627,14 @@ compatability_tests! {
     test_smove_command2: {
         commands: [
             "sadd myset 0",
-            "sadd myset 1",
-            "sadd {myset}otherset 2",
-            "smove myset {myset}otherset 1",
+            "smove myset myset2 0",
+            "smove myset myset2 0",
+            "scard myset2",
         ],
         results: [
             1,
             1,
-            1,
+            0,
             1,
         ],
         since: "1.0.0",

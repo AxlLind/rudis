@@ -74,6 +74,7 @@ register_commands!(
     sinterstore,
     sismember,
     smembers,
+    smove,
     strlen,
     type_,
     unlink,

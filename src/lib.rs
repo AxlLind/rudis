@@ -68,7 +68,7 @@ impl Database {
         self.state.remove(key)
     }
 
-    pub fn is_set(&self, key: &[u8]) -> bool {
+    pub fn contains(&self, key: &[u8]) -> bool {
         self.state.contains_key(key)
     }
 

@@ -22,7 +22,7 @@ impl RedisCommand for Cmd {
     fn run(&self, db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         let (key, newkey) = cmd.parse_args::<(ByteString, ByteString)>()?;
         let val = db.del(&key).ok_or(anyhow::anyhow!("key does not exist"))?;
-        let n = if db.is_set(&newkey) {
+        let n = if db.contains(&newkey) {
             0
         } else {
             db.set(newkey, val);
