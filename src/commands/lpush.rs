@@ -16,19 +16,33 @@ pub static INFO: CommandInfo = CommandInfo {
 };
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
-    let (key, elements) = cmd.parse_args::<(ByteString, Vec<ByteString>)>()?;
+    let (key, mut elements) = cmd.parse_args::<(ByteString, Vec<ByteString>)>()?;
     anyhow::ensure!(!elements.is_empty(), "expected LPUSH key element [element ...]");
     Ok(match db.get_list(&key)? {
         Some(list) => {
-            for (i, e) in elements.into_iter().enumerate() {
-                list.insert(i, e);
+            for e in elements {
+                list.insert(0, e);
             }
             Response::Number(list.len() as _)
         }
         None => {
             let len = elements.len();
+            elements.reverse();
             db.set(key, Value::Array(elements));
             Response::Number(len as _)
         }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_lpush
+        "lpush x 1 2 3"   => 3;
+        "lrange x 0 -1"   => ["3", "2", "1"];
+        "lpush x 4 5"     => 5;
+        "lrange x 0 -1"   => ["5", "4", "3", "2", "1"];
+    }
 }
