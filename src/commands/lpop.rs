@@ -28,3 +28,18 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         None => if list.is_empty() { Response::Nil } else { Response::String(list.remove(0)) },
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_lpop
+        "lpop x"            => ();
+        "rpush x 1 2 3 4 5" => 5;
+        "lpop x"            => "1";
+        "lrange x 0 -1"     => ["2", "3", "4", "5"];
+        "lpop x 3"          => ["2", "3", "4"];
+        "lrange x 0 -1"     => ["5"];
+    }
+}
