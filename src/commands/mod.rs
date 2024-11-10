@@ -48,6 +48,7 @@ register_commands!(
     decr,
     decrby,
     del,
+    echo,
     exists,
     flushall,
     flushdb,

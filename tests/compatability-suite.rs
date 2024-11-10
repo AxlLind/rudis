@@ -59,6 +59,15 @@ compatability_tests! {
         ],
         since: "1.0.0",
     },
+    test_echo_command: {
+        commands: [
+            "echo hello",
+        ],
+        results: [
+            "hello",
+        ],
+        since: "1.0.0",
+    },
     test_rename_command: {
         commands: [
             "set k v",
