@@ -26,7 +26,7 @@ impl RedisCommand for Cmd {
         match db.get_set(&key)? {
             Some(set) => {
                 let prelen = set.len();
-                set.extend(elems.into_iter());
+                set.extend(elems);
                 Ok(Response::Number((set.len() - prelen) as _))
             }
             None => {

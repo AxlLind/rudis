@@ -28,7 +28,7 @@ impl RedisCommand for Cmd {
             return Ok(Response::Number(0));
         };
         for k in &keys[1..] {
-            let Some(s) = db.get_set(&k)? else { continue };
+            let Some(s) = db.get_set(k)? else { continue };
             set.retain(|e| !s.contains(e));
         }
         let len = set.len();
