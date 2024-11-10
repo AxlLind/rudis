@@ -19,3 +19,15 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     db.set(key, Value::String(value));
     Ok(Response::String(b"OK".to_vec()))
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_set
+        "set x a" => "OK";
+        "get x"   => "a";
+        "get a"   => ();
+    }
+}
