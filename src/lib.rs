@@ -124,6 +124,9 @@ pub fn write_response(writer: &mut impl Write, res: Response) -> anyhow::Result<
 }
 
 #[cfg(test)]
+mod test_utils;
+
+#[cfg(test)]
 mod tests {
     use super::*;
 

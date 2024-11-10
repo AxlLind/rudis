@@ -152,7 +152,7 @@ register_commands! {
     migrate,              // unimplemented
     module,               // unimplemented
     monitor,              // unimplemented
-    r#move,
+    r#move,               // unimplemented
     mset,                 // unimplemented
     msetnx,               // unimplemented
     multi,                // unimplemented
