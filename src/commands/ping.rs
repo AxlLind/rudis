@@ -17,3 +17,15 @@ pub fn run(_: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let message = cmd.parse_args::<Option<ByteString>>()?;
     Ok(Response::String(message.unwrap_or_else(|| b"PONG".to_vec())))
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_ping
+        "ping"      => "PONG";
+        "ping PONG" => "PONG";
+        "ping HI"   => "HI";
+    }
+}
