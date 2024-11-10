@@ -28,3 +28,14 @@ pub fn run(_: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     };
     Ok(res)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::redis_test;
+
+    redis_test! {
+        test_command_count
+        "command COUNT" => COMMAND_LIST.len() as i64;
+    }
+}
