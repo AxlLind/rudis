@@ -114,7 +114,7 @@ register_commands! {
     getbit,               // unimplemented
     getdel,
     getex,                // unimplemented
-    getrange,             // unimplemented
+    getrange,
     getset,
     hdel,                 // unimplemented
     hello,                // unimplemented
@@ -231,7 +231,7 @@ register_commands! {
     ssubscribe,           // unimplemented
     strlen,
     subscribe,            // unimplemented
-    substr,               // unimplemented
+    substr,
     sunion,
     sunionstore,
     sunsubscribe,         // unimplemented
