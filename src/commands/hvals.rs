@@ -1,6 +1,6 @@
 use super::CommandInfo;
 use crate::cmd_parser::Command;
-use crate::{Database, Response};
+use crate::{ByteString, Database, Response};
 
 pub static INFO: CommandInfo = CommandInfo {
     name: b"hvals",
@@ -13,6 +13,23 @@ pub static INFO: CommandInfo = CommandInfo {
     step: 1,
 };
 
-pub fn run(_: &mut Database, _: Command) -> anyhow::Result<Response> {
-    anyhow::bail!("unimplemented")
+pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
+    let key = cmd.parse_args::<ByteString>()?;
+    let mut keys = db.get_hash(&key)?.map(|h| h.values().cloned().collect::<Vec<_>>()).unwrap_or_default();
+    keys.sort();
+    Ok(Response::Array(keys))
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_hvals
+        "hset x a b x y" => 2;
+        "hvals x"        => ["b", "y"];
+        "hdel x a"       => 1;
+        "hvals x"        => ["y"];
+        "hvals q"        => [];
+    }
 }
