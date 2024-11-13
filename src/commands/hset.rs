@@ -38,7 +38,7 @@ mod tests {
     use crate::redis_test;
 
     redis_test! {
-        test_strlen
+        test_hset
         "hset x a b x y" => 2;
         "hget x a" => "b";
         "hget x x" => "y";

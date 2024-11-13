@@ -28,7 +28,7 @@ mod tests {
     use crate::redis_test;
 
     redis_test! {
-        test_hlen
+        test_hdel
         "hset x a b x y" => 2;
         "hdel x a b"     => 1;
         "hlen x"         => 1;

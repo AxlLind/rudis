@@ -32,13 +32,14 @@ mod tests {
 
     redis_test! {
         test_type
-        "type x" => "none";
-        "set x 0" => "OK";
-        "type x" => "string";
-        "rpush y 1" => 1;
-        "type y" => "list";
-        "sadd z 1" => 1;
-        "type z" => "set";
-        // TODO: add test for hash
+        "type x"     => "none";
+        "set x 0"    => "OK";
+        "type x"     => "string";
+        "rpush y 1"  => 1;
+        "type y"     => "list";
+        "sadd z 1"   => 1;
+        "type z"     => "set";
+        "hset h x y" => 1;
+        "type h"     => "hash";
     }
 }
