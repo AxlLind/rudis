@@ -3,7 +3,7 @@ use std::sync::LazyLock;
 
 use crate::{Command, Database, Response, ByteString, Value};
 
-fn int_from_bytes(bytes: &[u8]) -> anyhow::Result<i64> {
+pub fn int_from_bytes(bytes: &[u8]) -> anyhow::Result<i64> {
     std::str::from_utf8(bytes)
         .map_err(|_| anyhow::anyhow!("tried to parse number, got non-utf8 value"))?
         .parse::<i64>()
@@ -116,23 +116,23 @@ register_commands! {
     getex,                // unimplemented
     getrange,
     getset,
-    hdel,                 // unimplemented
+    hdel,
     hello,                // unimplemented
-    hexists,              // unimplemented
-    hget,                 // unimplemented
-    hgetall,              // unimplemented
-    hincrby,              // unimplemented
+    hexists,
+    hget,
+    hgetall,
+    hincrby,
     hincrbyfloat,         // unimplemented
-    hkeys,                // unimplemented
-    hlen,                 // unimplemented
+    hkeys,
+    hlen,
     hmget,                // unimplemented
     hmset,                // unimplemented
     hrandfield,           // unimplemented
     hscan,                // unimplemented
-    hset,                 // unimplemented
+    hset,
     hsetnx,               // unimplemented
-    hstrlen,              // unimplemented
-    hvals,                // unimplemented
+    hstrlen,
+    hvals,
     incr,
     incrby,
     incrbyfloat,          // unimplemented
