@@ -1,6 +1,6 @@
 use super::CommandInfo;
 use crate::cmd_parser::Command;
-use crate::{Database, Response};
+use crate::{ByteString, Database, Response, Value};
 
 pub static INFO: CommandInfo = CommandInfo {
     name: b"hset",
@@ -15,6 +15,32 @@ pub static INFO: CommandInfo = CommandInfo {
     step: 1,
 };
 
-pub fn run(_: &mut Database, _: Command) -> anyhow::Result<Response> {
-    anyhow::bail!("unimplemented")
+pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
+    let (key, fields) = cmd.parse_args::<(ByteString, Vec<(ByteString, ByteString)>)>()?;
+    anyhow::ensure!(!fields.is_empty(), "expected HSET key field value [field value ..]");
+    let len = fields.len();
+    match db.get_hash(&key)? {
+        Some(hash) => {
+            for (k, v) in fields {
+                hash.insert(k, v);
+            }
+        }
+        None => {
+            let hash = fields.into_iter().collect();
+            db.set(key, Value::Hash(hash));
+        }
+    }
+    Ok(Response::Number(len as _))
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_strlen
+        "hset x a b x y" => 2;
+        "hget x a" => "b";
+        "hget x x" => "y";
+    }
 }

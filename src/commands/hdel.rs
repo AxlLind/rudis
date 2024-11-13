@@ -1,6 +1,6 @@
 use super::CommandInfo;
 use crate::cmd_parser::Command;
-use crate::{Database, Response};
+use crate::{ByteString, Database, Response};
 
 pub static INFO: CommandInfo = CommandInfo {
     name: b"hdel",
@@ -14,6 +14,26 @@ pub static INFO: CommandInfo = CommandInfo {
     step: 1,
 };
 
-pub fn run(_: &mut Database, _: Command) -> anyhow::Result<Response> {
-    anyhow::bail!("unimplemented")
+pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
+    let (key, fields) = cmd.parse_args::<(ByteString, Vec<ByteString>)>()?;
+    anyhow::ensure!(!fields.is_empty(), "expected HDEL key field [field ..]");
+    let deleted = db.get_hash(&key)?
+        .map(|h| fields.iter().filter_map(|f| h.remove(f)).count())
+        .unwrap_or(0);
+    Ok(Response::Number(deleted as _))
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::redis_test;
+
+    redis_test! {
+        test_hlen
+        "hset x a b x y" => 2;
+        "hdel x a b"     => 1;
+        "hlen x"         => 1;
+        "hdel x x"       => 1;
+        "hlen x"         => 0;
+        "hdel q a b c"   => 0;
+    }
 }

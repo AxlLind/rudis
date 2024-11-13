@@ -25,9 +25,13 @@ impl FromArgs for i64 {
     }
 }
 
-impl FromArgs for Vec<ByteString> {
+impl<T: FromArgs> FromArgs for Vec<T> {
     fn from_args(cmd: &mut Command) -> anyhow::Result<Self> {
-        Ok(std::mem::take(&mut cmd.args).into())
+        let mut v = Vec::new();
+        while cmd.has_more() {
+            v.push(T::from_args(cmd)?);
+        }
+        Ok(v)
     }
 }
 

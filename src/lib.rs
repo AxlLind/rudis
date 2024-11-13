@@ -52,6 +52,14 @@ impl Database {
         }
     }
 
+    pub fn get_hash(&mut self, key: &[u8]) -> anyhow::Result<Option<&mut HashMap<ByteString, ByteString>>> {
+        match self.get(key) {
+            Some(Value::Hash(v)) => Ok(Some(v)),
+            Some(_) => anyhow::bail!("expected set value"),
+            None => Ok(None)
+        }
+    }
+
     pub fn get_set(&mut self, key: &[u8]) -> anyhow::Result<Option<&mut HashSet<ByteString>>> {
         match self.get(key) {
             Some(Value::Set(v)) => Ok(Some(v)),
