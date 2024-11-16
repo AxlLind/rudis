@@ -1,6 +1,6 @@
 use super::CommandInfo;
 use crate::cmd_parser::Command;
-use crate::{Database, Response};
+use crate::{ByteString, Database, Response};
 
 pub static INFO: CommandInfo = CommandInfo {
     name: b"zscore",
@@ -14,6 +14,20 @@ pub static INFO: CommandInfo = CommandInfo {
     step: 1,
 };
 
-pub fn run(_: &mut Database, _: Command) -> anyhow::Result<Response> {
-    anyhow::bail!("unimplemented")
+pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
+    let (key, member) = cmd.parse_args::<(ByteString, ByteString)>()?;
+    let res = db.get_zset(&key)?
+        .and_then(|s| s.get_score(&member))
+        .map(|score| Response::Number(score))
+        .unwrap_or(Response::Nil);
+    Ok(res)
+}
+
+#[cfg(test)]
+crate::command_test! {
+    "zadd x 1 a 99 b" => 2;
+    "zscore x a"      => 1;
+    "zscore x b"      => 99;
+    "zscore x c"      => ();
+    "zscore q a"      => ();
 }
