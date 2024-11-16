@@ -3,6 +3,8 @@ use std::io::Write;
 
 mod cmd_parser;
 mod commands;
+mod sorted_set;
+use sorted_set::SortedSet;
 use commands::CommandInfo;
 pub use cmd_parser::{Parser, Command};
 pub use commands::COMMANDS;
@@ -15,6 +17,7 @@ pub enum Value {
     Array(Vec<ByteString>),
     Hash(HashMap<ByteString, ByteString>),
     Set(HashSet<ByteString>),
+    ZSet(SortedSet<ByteString, i64>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -63,6 +66,14 @@ impl Database {
     pub fn get_set(&mut self, key: &[u8]) -> anyhow::Result<Option<&mut HashSet<ByteString>>> {
         match self.get(key) {
             Some(Value::Set(v)) => Ok(Some(v)),
+            Some(_) => anyhow::bail!("expected set value"),
+            None => Ok(None)
+        }
+    }
+
+    pub fn get_zset(&mut self, key: &[u8]) -> anyhow::Result<Option<&mut SortedSet<ByteString, i64>>> {
+        match self.get(key) {
+            Some(Value::ZSet(v)) => Ok(Some(v)),
             Some(_) => anyhow::bail!("expected set value"),
             None => Ok(None)
         }

@@ -21,6 +21,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         Some(Value::Array(_)) => b"list",
         Some(Value::Hash(_)) => b"hash",
         Some(Value::Set(_)) => b"set",
+        Some(Value::ZSet(_)) => b"zset",
         None => b"none",
     };
     Ok(Response::String(t.to_vec()))
@@ -37,9 +38,11 @@ mod tests {
         "type x"     => "string";
         "rpush y 1"  => 1;
         "type y"     => "list";
-        "sadd z 1"   => 1;
-        "type z"     => "set";
+        "sadd s 1"   => 1;
+        "type s"     => "set";
         "hset h x y" => 1;
         "type h"     => "hash";
+        "zadd z 1 a" => 1;
+        "type z"     => "zset";
     }
 }
