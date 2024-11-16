@@ -33,20 +33,15 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_sunion
-        "sadd x 1 2 3" => 3;
-        "sadd y 2 3 4" => 3;
-        "sadd z 3 4 5" => 3;
-        "sunion x"     => ["1", "2", "3"];
-        "sunion x z"   => ["1", "2", "3", "4", "5"];
-        "sunion x y z" => ["1", "2", "3", "4", "5"];
-        "sunion x y"   => ["1", "2", "3", "4"];
-        "sunion y z"   => ["2", "3", "4", "5"];
-        "sunion q"     => [];
-        "sunion q x"   => ["1", "2", "3"];
-    }
+crate::command_test! {
+    "sadd x 1 2 3" => 3;
+    "sadd y 2 3 4" => 3;
+    "sadd z 3 4 5" => 3;
+    "sunion x"     => ["1", "2", "3"];
+    "sunion x z"   => ["1", "2", "3", "4", "5"];
+    "sunion x y z" => ["1", "2", "3", "4", "5"];
+    "sunion x y"   => ["1", "2", "3", "4"];
+    "sunion y z"   => ["2", "3", "4", "5"];
+    "sunion q"     => [];
+    "sunion q x"   => ["1", "2", "3"];
 }

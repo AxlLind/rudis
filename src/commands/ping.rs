@@ -19,13 +19,8 @@ pub fn run(_: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_ping
-        "ping"      => "PONG";
-        "ping PONG" => "PONG";
-        "ping HI"   => "HI";
-    }
+crate::command_test! {
+    "ping"      => "PONG";
+    "ping PONG" => "PONG";
+    "ping HI"   => "HI";
 }

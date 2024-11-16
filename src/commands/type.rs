@@ -28,21 +28,16 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_type
-        "type x"     => "none";
-        "set x 0"    => "OK";
-        "type x"     => "string";
-        "rpush y 1"  => 1;
-        "type y"     => "list";
-        "sadd s 1"   => 1;
-        "type s"     => "set";
-        "hset h x y" => 1;
-        "type h"     => "hash";
-        "zadd z 1 a" => 1;
-        "type z"     => "zset";
-    }
+crate::command_test! {
+    "type x"     => "none";
+    "set x 0"    => "OK";
+    "type x"     => "string";
+    "rpush y 1"  => 1;
+    "type y"     => "list";
+    "sadd s 1"   => 1;
+    "type s"     => "set";
+    "hset h x y" => 1;
+    "type h"     => "hash";
+    "zadd z 1 a" => 1;
+    "type z"     => "zset";
 }

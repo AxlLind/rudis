@@ -27,10 +27,10 @@ impl<const N: usize> AsResponse for [&str; N] {
 }
 
 #[macro_export]
-macro_rules! redis_test {
-    ($test:ident $($cmd:literal => $expected:expr;)+) => {
+macro_rules! command_test {
+    ($($cmd:literal => $expected:expr;)+) => {
         #[test]
-        fn $test() {
+        fn test_cmd() {
             let mut db = $crate::Database::default();
             $(
                 let cmd = $crate::Command::new($cmd.split(' ').map(|w| w.as_bytes().to_vec()).collect()).unwrap();

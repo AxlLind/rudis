@@ -21,15 +21,10 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_decrby
-        "decrby x 10"   => -10;
-        "decrby x -10"  => 0;
-        "set x 1234"    => "OK";
-        "decrby x 1000" => 234;
-        "get x"         => "234";
-    }
+crate::command_test! {
+    "decrby x 10"   => -10;
+    "decrby x -10"  => 0;
+    "set x 1234"    => "OK";
+    "decrby x 1000" => 234;
+    "get x"         => "234";
 }

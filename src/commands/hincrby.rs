@@ -36,15 +36,10 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_hincrby
-        "hincrby x a 10" => 10;
-        "hincrby x a -5" => 5;
-        "hget x a"       => "5";
-        "hincrby x a 20" => 25;
-        "hincrby x y -3" => -3;
-    }
+crate::command_test! {
+    "hincrby x a 10" => 10;
+    "hincrby x a -5" => 5;
+    "hget x a"       => "5";
+    "hincrby x a 20" => 25;
+    "hincrby x y -3" => -3;
 }

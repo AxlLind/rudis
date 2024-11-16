@@ -24,16 +24,11 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_zrem
-        "zadd x 1 a 1 b" => 2;
-        "zrem x b c"     => 1;
-        "zcard x"        => 1;
-        "zrem x x y z"   => 0;
-        "zrem x a"       => 1;
-        "zrem q a b"     => 0;
-    }
+crate::command_test! {
+    "zadd x 1 a 1 b" => 2;
+    "zrem x b c"     => 1;
+    "zcard x"        => 1;
+    "zrem x x y z"   => 0;
+    "zrem x a"       => 1;
+    "zrem q a b"     => 0;
 }

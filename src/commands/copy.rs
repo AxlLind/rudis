@@ -28,15 +28,10 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_copy
-        "set x a"  => "OK";
-        "copy x y" => 1;
-        "get y"    => "a";
-        "copy z y" => 0;
-        "get y"    => "a";
-    }
+crate::command_test! {
+    "set x a"  => "OK";
+    "copy x y" => 1;
+    "get y"    => "a";
+    "copy z y" => 0;
+    "get y"    => "a";
 }

@@ -30,14 +30,9 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_getset
-        "getset x 0" => ();
-        "get x"      => "0";
-        "getset x 1" => "0";
-        "get x"      => "1";
-    }
+crate::command_test! {
+    "getset x 0" => ();
+    "get x"      => "0";
+    "getset x 1" => "0";
+    "get x"      => "1";
 }

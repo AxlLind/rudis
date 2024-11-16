@@ -27,18 +27,13 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_renamenx
-        "set x 0"      => "OK";
-        "renamenx x y" => 1;
-        "exists x"     => 0;
-        "get y"        => "0";
-        "set x 1"      => "OK";
-        "renamenx y x" => 0;
-        "get x"        => "1";
-        "renamenx x x" => 0;
-    }
+crate::command_test! {
+    "set x 0"      => "OK";
+    "renamenx x y" => 1;
+    "exists x"     => 0;
+    "get y"        => "0";
+    "set x 1"      => "OK";
+    "renamenx y x" => 0;
+    "get x"        => "1";
+    "renamenx x x" => 0;
 }

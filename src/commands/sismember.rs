@@ -21,17 +21,12 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_sismember
-        "sadd x 1 2 3"    => 3;
-        "sismember x 1"   => 1;
-        "sismember x 2"   => 1;
-        "sismember x 3"   => 1;
-        "sismember x 4"   => 0;
-        "sismember x abc" => 0;
-        "sismember q 1"   => 0;
-    }
+crate::command_test! {
+    "sadd x 1 2 3"    => 3;
+    "sismember x 1"   => 1;
+    "sismember x 2"   => 1;
+    "sismember x 3"   => 1;
+    "sismember x 4"   => 0;
+    "sismember x abc" => 0;
+    "sismember q 1"   => 0;
 }

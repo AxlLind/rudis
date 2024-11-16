@@ -29,17 +29,12 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_rpop
-        "rpop x"            => ();
-        "rpush x 1 2 3 4 5" => 5;
-        "rpop x"            => "5";
-        "lrange x 0 -1"     => ["1", "2", "3", "4"];
-        "rpop x 3"          => ["4", "3", "2"];
-        "rpop x 10"         => ["1"];
-        "llen x"            => 0;
-    }
+crate::command_test! {
+    "rpop x"            => ();
+    "rpush x 1 2 3 4 5" => 5;
+    "rpop x"            => "5";
+    "lrange x 0 -1"     => ["1", "2", "3", "4"];
+    "rpop x 3"          => ["4", "3", "2"];
+    "rpop x 10"         => ["1"];
+    "llen x"            => 0;
 }

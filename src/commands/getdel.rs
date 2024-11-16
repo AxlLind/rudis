@@ -26,14 +26,9 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_getdel
-        "getdel x" => ();
-        "set x 0"  => "OK";
-        "getdel x" => "0";
-        "exists x" => 0;
-    }
+crate::command_test! {
+    "getdel x" => ();
+    "set x 0"  => "OK";
+    "getdel x" => "0";
+    "exists x" => 0;
 }

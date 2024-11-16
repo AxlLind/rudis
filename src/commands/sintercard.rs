@@ -26,20 +26,15 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_sintercard
-        "sadd x 1 2 3"       => 3;
-        "sadd y 2 3 4"       => 3;
-        "sadd z 3 4 5"       => 3;
-        "sintercard 1 x"     => 3;
-        "sintercard 2 x z"   => 1;
-        "sintercard 3 x y z" => 1;
-        "sintercard 2 x y"   => 2;
-        "sintercard 2 y x"   => 2;
-        "sintercard 1 q"     => 0;
-        "sintercard 2 q x"   => 0;
-    }
+crate::command_test! {
+    "sadd x 1 2 3"       => 3;
+    "sadd y 2 3 4"       => 3;
+    "sadd z 3 4 5"       => 3;
+    "sintercard 1 x"     => 3;
+    "sintercard 2 x z"   => 1;
+    "sintercard 3 x y z" => 1;
+    "sintercard 2 x y"   => 2;
+    "sintercard 2 y x"   => 2;
+    "sintercard 1 q"     => 0;
+    "sintercard 2 q x"   => 0;
 }

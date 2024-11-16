@@ -25,19 +25,14 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     }
 }
 
+// TODO: test multiple databases
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    // TODO: test multiple databases
-    redis_test! {
-        test_flushall
-        "set x 1"      => "OK";
-        "set y 1"      => "OK";
-        "set z 1"      => "OK";
-        "dbsize"       => 3;
-        "flushall"     => "OK";
-        "dbsize"       => 0;
-        "exists x y z" => 0;
-    }
+crate::command_test! {
+    "set x 1"      => "OK";
+    "set y 1"      => "OK";
+    "set z 1"      => "OK";
+    "dbsize"       => 3;
+    "flushall"     => "OK";
+    "dbsize"       => 0;
+    "exists x y z" => 0;
 }

@@ -32,19 +32,14 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_smove
-        "sadd x 1 2 3"    => 3;
-        "smove x y 1"     => 1;
-        "smembers x"      => ["2", "3"];
-        "smembers y"      => ["1"];
-        "smove x y 2"     => 1;
-        "smembers x"      => ["3"];
-        "smembers y"      => ["1", "2"];
-        "smove x y 1"     => 0;
-        "smove q y 1"     => 0;
-    }
+crate::command_test! {
+    "sadd x 1 2 3"    => 3;
+    "smove x y 1"     => 1;
+    "smembers x"      => ["2", "3"];
+    "smembers y"      => ["1"];
+    "smove x y 2"     => 1;
+    "smembers x"      => ["3"];
+    "smembers y"      => ["1", "2"];
+    "smove x y 1"     => 0;
+    "smove q y 1"     => 0;
 }

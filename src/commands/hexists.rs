@@ -21,15 +21,10 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_hexists
-        "hset x a b x y" => 2;
-        "hexists x a" => 1;
-        "hexists x x" => 1;
-        "hexists x b" => 0;
-        "hexists q r" => 0;
-    }
+crate::command_test! {
+    "hset x a b x y" => 2;
+    "hexists x a"    => 1;
+    "hexists x x"    => 1;
+    "hexists x b"    => 0;
+    "hexists q r"    => 0;
 }

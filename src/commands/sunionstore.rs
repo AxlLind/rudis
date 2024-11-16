@@ -34,27 +34,22 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_sunionstore
-        "sadd x 1 2 3"        => 3;
-        "sadd y 2 3 4"        => 3;
-        "sadd z 3 4 5"        => 3;
-        "sunionstore r x"     => 3;
-        "smembers r"          => ["1", "2", "3"];
-        "sunionstore r x z"   => 5;
-        "smembers r"          => ["1", "2", "3", "4", "5"];
-        "sunionstore r x y z" => 5;
-        "smembers r"          => ["1", "2", "3", "4", "5"];
-        "sunionstore r x y"   => 4;
-        "smembers r"          => ["1", "2", "3", "4"];
-        "sunionstore r y z"   => 4;
-        "smembers r"          => ["2", "3", "4", "5"];
-        "sunionstore r q"     => 0;
-        "smembers r"          => [];
-        "sunionstore r q x"   => 3;
-        "smembers r"          => ["1", "2", "3"];
-    }
+crate::command_test! {
+    "sadd x 1 2 3"        => 3;
+    "sadd y 2 3 4"        => 3;
+    "sadd z 3 4 5"        => 3;
+    "sunionstore r x"     => 3;
+    "smembers r"          => ["1", "2", "3"];
+    "sunionstore r x z"   => 5;
+    "smembers r"          => ["1", "2", "3", "4", "5"];
+    "sunionstore r x y z" => 5;
+    "smembers r"          => ["1", "2", "3", "4", "5"];
+    "sunionstore r x y"   => 4;
+    "smembers r"          => ["1", "2", "3", "4"];
+    "sunionstore r y z"   => 4;
+    "smembers r"          => ["2", "3", "4", "5"];
+    "sunionstore r q"     => 0;
+    "smembers r"          => [];
+    "sunionstore r q x"   => 3;
+    "smembers r"          => ["1", "2", "3"];
 }

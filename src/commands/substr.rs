@@ -25,16 +25,11 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_strlen
-        "set x this_is_a_string" => "OK";
-        "substr x 0 3"           => "this";
-        "substr x -3 -1"         => "ing";
-        "substr x 0 -1"          => "this_is_a_string";
-        "substr x 10 100"        => "string";
-        "substr q 0 -1"          => "";
-    }
+crate::command_test! {
+    "set x this_is_a_string" => "OK";
+    "substr x 0 3"           => "this";
+    "substr x -3 -1"         => "ing";
+    "substr x 0 -1"          => "this_is_a_string";
+    "substr x 10 100"        => "string";
+    "substr q 0 -1"          => "";
 }

@@ -35,14 +35,9 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_lpush
-        "lpush x 1 2 3"   => 3;
-        "lrange x 0 -1"   => ["3", "2", "1"];
-        "lpush x 4 5"     => 5;
-        "lrange x 0 -1"   => ["5", "4", "3", "2", "1"];
-    }
+crate::command_test! {
+    "lpush x 1 2 3"   => 3;
+    "lrange x 0 -1"   => ["3", "2", "1"];
+    "lpush x 4 5"     => 5;
+    "lrange x 0 -1"   => ["5", "4", "3", "2", "1"];
 }

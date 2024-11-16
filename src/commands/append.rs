@@ -32,16 +32,11 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_append
-        "append x abc" => 3;
-        "append x def" => 6;
-        "get x"        => "abcdef";
-        "set y 123"    => "OK";
-        "append y 4"   => 4;
-        "get y"        => "1234";
-    }
+crate::command_test! {
+    "append x abc" => 3;
+    "append x def" => 6;
+    "get x"        => "abcdef";
+    "set y 123"    => "OK";
+    "append y 4"   => 4;
+    "get y"        => "1234";
 }

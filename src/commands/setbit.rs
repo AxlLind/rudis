@@ -47,18 +47,13 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_setbit
-        "setbit x 15 1" => 0;
-        "strlen x"      => 2;
-        "getbit x 15"   => 1;
-        "setbit x 15 0" => 1;
-        "getbit x 15"   => 0;
-        "set x a"       => "OK";
-        "setbit x 6 1"  => 0;
-        "get x"         => "c";
-    }
+crate::command_test! {
+    "setbit x 15 1" => 0;
+    "strlen x"      => 2;
+    "getbit x 15"   => 1;
+    "setbit x 15 0" => 1;
+    "getbit x 15"   => 0;
+    "set x a"       => "OK";
+    "setbit x 6 1"  => 0;
+    "get x"         => "c";
 }

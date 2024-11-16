@@ -20,15 +20,10 @@ pub fn run(db: &mut Database, cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_dbsize
-        "dbsize" => 0;
-        "set x 1" => "OK";
-        "dbsize" => 1;
-        "set y 2" => "OK";
-        "dbsize" => 2;
-    }
+crate::command_test! {
+    "dbsize" => 0;
+    "set x 1" => "OK";
+    "dbsize" => 1;
+    "set y 2" => "OK";
+    "dbsize" => 2;
 }

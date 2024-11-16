@@ -21,15 +21,10 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_hvals
-        "hset x a b x y" => 2;
-        "hvals x"        => ["b", "y"];
-        "hdel x a"       => 1;
-        "hvals x"        => ["y"];
-        "hvals q"        => [];
-    }
+crate::command_test! {
+    "hset x a b x y" => 2;
+    "hvals x"        => ["b", "y"];
+    "hdel x a"       => 1;
+    "hvals x"        => ["y"];
+    "hvals q"        => [];
 }

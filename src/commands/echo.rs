@@ -21,12 +21,7 @@ pub fn run(_: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_echo
-        "echo hello" => "hello";
-        "echo HELLO" => "HELLO";
-    }
+crate::command_test! {
+    "echo hello" => "hello";
+    "echo HELLO" => "HELLO";
 }

@@ -28,24 +28,19 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_getbit
-        "set x abc"    => "OK";
-        "getbit x 100" => 0;
-        "getbit x 0"   => 0;
-        "getbit x 1"   => 1;
-        "getbit x 2"   => 1;
-        "getbit x 3"   => 0;
-        "getbit x 4"   => 0;
-        "getbit x 5"   => 0;
-        "getbit x 6"   => 0;
-        "getbit x 7"   => 1;
-        "getbit x 17"  => 1;
-        "getbit x 18"  => 1;
-        "getbit x 19"  => 0;
-        "getbit q 8"   => 0;
-    }
+crate::command_test! {
+    "set x abc"    => "OK";
+    "getbit x 100" => 0;
+    "getbit x 0"   => 0;
+    "getbit x 1"   => 1;
+    "getbit x 2"   => 1;
+    "getbit x 3"   => 0;
+    "getbit x 4"   => 0;
+    "getbit x 5"   => 0;
+    "getbit x 6"   => 0;
+    "getbit x 7"   => 1;
+    "getbit x 17"  => 1;
+    "getbit x 18"  => 1;
+    "getbit x 19"  => 0;
+    "getbit q 8"   => 0;
 }

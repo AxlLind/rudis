@@ -21,15 +21,10 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_smembers
-        "sadd x 1 2 3" => 3;
-        "smembers x"   => ["1", "2", "3"];
-        "sadd x 3 4"   => 1;
-        "smembers x"   => ["1", "2", "3", "4"];
-        "smembers q"   => [];
-    }
+crate::command_test! {
+    "sadd x 1 2 3" => 3;
+    "smembers x"   => ["1", "2", "3"];
+    "sadd x 3 4"   => 1;
+    "smembers x"   => ["1", "2", "3", "4"];
+    "smembers q"   => [];
 }

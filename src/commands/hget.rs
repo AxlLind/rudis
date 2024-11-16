@@ -24,15 +24,10 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::redis_test;
-
-    redis_test! {
-        test_hget
-        "hset x a b x xyz" => 2;
-        "hget x a"         => "b";
-        "hget x x"         => "xyz";
-        "hget x q"         => ();
-        "hget q r"         => ();
-    }
+crate::command_test! {
+    "hset x a b x xyz" => 2;
+    "hget x a"         => "b";
+    "hget x x"         => "xyz";
+    "hget x q"         => ();
+    "hget q r"         => ();
 }
