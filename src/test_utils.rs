@@ -12,10 +12,6 @@ impl AsResponse for &str {
     fn as_response(s: Self) -> Response { Response::String(s.to_string().into_bytes()) }
 }
 
-impl AsResponse for Vec<u8> {
-    fn as_response(s: Self) -> Response { Response::String(s) }
-}
-
 impl AsResponse for i64 {
     fn as_response(s: Self) -> Response { Response::Number(s) }
 }
