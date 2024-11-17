@@ -18,7 +18,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let pairs = db.get_hash(&key)?.map(|h| {
         let mut pairs = h.iter().collect::<Vec<_>>();
         pairs.sort();
-        pairs.into_iter().flat_map(|(k, v)| [k, v]).cloned().collect()
+        pairs.into_iter().flat_map(|(k, v)| [k, v]).cloned().collect::<Vec<_>>()
     }).unwrap_or_default();
     Ok(Response::string_array(pairs))
 }

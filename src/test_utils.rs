@@ -18,7 +18,7 @@ impl AsResponse for i64 {
 
 impl<const N: usize> AsResponse for [&str; N] {
     fn as_response(s: Self) -> Response {
-        Response::string_array(s.iter().map(|x| x.as_bytes().to_vec()).collect())
+        Response::string_array(s.iter().map(|x| x.as_bytes().to_vec()))
     }
 }
 

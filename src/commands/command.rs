@@ -18,7 +18,7 @@ fn info_response(info: &CommandInfo) -> Response {
     Response::Array(vec![
         Response::BulkString(info.name.to_vec()),
         Response::Number(info.arity),
-        Response::string_array(info.flags.iter().map(|s| s.to_vec()).collect()),
+        Response::string_array(info.flags.iter().map(|s| s.to_vec())),
         Response::Number(info.first_key),
         Response::Number(info.last_key),
         Response::Number(info.step),

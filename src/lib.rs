@@ -29,8 +29,8 @@ pub enum Response {
 }
 
 impl Response {
-    pub fn string_array(strs: Vec<ByteString>) -> Self {
-        Self::Array(strs.into_iter().map(Response::BulkString).collect())
+    pub fn string_array(strings: impl IntoIterator<Item=ByteString>) -> Self {
+        Self::Array(strings.into_iter().map(Response::BulkString).collect())
     }
 }
 

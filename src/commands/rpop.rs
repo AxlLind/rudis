@@ -21,8 +21,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         Some(n) if n < 0 => anyhow::bail!("value is out of range, must be positive"),
         Some(n) => {
             let n = a.len().min(n as _);
-            let v = (0..n).map(|_| a.pop().unwrap()).collect();
-            Response::string_array(v)
+            Response::string_array((0..n).map(|_| a.pop().unwrap()))
         }
         None => a.pop().map(|v| Response::SimpleString(v)).unwrap_or(Response::Nil),
     })
