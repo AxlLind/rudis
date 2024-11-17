@@ -30,3 +30,13 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         }
     })
 }
+
+#[cfg(test)]
+crate::command_test! {
+    "rpush x 1 2 3"   => 3;
+    "lrange x 0 -1"   => ["1", "2", "3"];
+    "rpush x 4 5"     => 5;
+    "lrange x 0 -1"   => ["1", "2", "3", "4", "5"];
+    "rpush x 6"       => 6;
+    "lrange x 0 -1"   => ["1", "2", "3", "4", "5", "6"];
+}
