@@ -15,7 +15,7 @@ pub static INFO: CommandInfo = CommandInfo {
 
 pub fn run(_: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let message = cmd.parse_args::<Option<ByteString>>()?;
-    Ok(Response::String(message.unwrap_or_else(|| b"PONG".to_vec())))
+    Ok(Response::SimpleString(message.unwrap_or_else(|| b"PONG".to_vec())))
 }
 
 #[cfg(test)]

@@ -18,7 +18,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     match arg.as_deref() {
         Some(b"SYNC") | None => {
             db.clear();
-            Ok(Response::String(b"OK".to_vec()))
+            Ok(Response::SimpleString(b"OK".to_vec()))
         },
         Some(b"ASYNC") => anyhow::bail!("async flush not implemented"),
         _ => anyhow::bail!("invalid argument"),

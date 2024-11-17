@@ -18,7 +18,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let key = cmd.parse_args::<ByteString>()?;
     let res = db.get_str(&key)?.cloned().map(|s| {
         db.del(&key);
-        Response::String(s)
+        Response::SimpleString(s)
     }).unwrap_or_default();
     Ok(res)
 }

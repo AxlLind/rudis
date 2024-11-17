@@ -19,7 +19,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         .map(|h| h.values().cloned().collect::<Vec<_>>())
         .unwrap_or_default();
     keys.sort();
-    Ok(Response::Array(keys))
+    Ok(Response::string_array(keys))
 }
 
 #[cfg(test)]

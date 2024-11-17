@@ -5,7 +5,6 @@ mod cmd_parser;
 mod commands;
 mod sorted_set;
 use sorted_set::SortedSet;
-use commands::CommandInfo;
 pub use cmd_parser::{Parser, Command};
 pub use commands::COMMANDS;
 
@@ -22,11 +21,17 @@ pub enum Value {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Response {
-    String(ByteString),
+    SimpleString(ByteString),
+    BulkString(ByteString),
     Number(i64),
-    Array(Vec<ByteString>),
-    CommandList(Vec<&'static CommandInfo>),
+    Array(Vec<Response>),
     Nil,
+}
+
+impl Response {
+    pub fn string_array(strs: Vec<ByteString>) -> Self {
+        Self::Array(strs.into_iter().map(Response::BulkString).collect())
+    }
 }
 
 impl Default for Response {
@@ -146,15 +151,20 @@ pub fn escape_bytes(bytes: &[u8]) -> String {
 
 pub fn execute_command(db: &mut Database, cmd: Command) -> anyhow::Result<Response> {
     match COMMANDS.get(cmd.cmd().as_bytes()) {
-        Some(command) => command(db, cmd),
+        Some((command, _)) => command(db, cmd),
         None => anyhow::bail!("Unrecognized command: {:?}", cmd.cmd()),
     }
 }
 
 pub fn write_response(writer: &mut impl Write, res: Response) -> anyhow::Result<()> {
     match res {
-        Response::String(value) => {
+        Response::SimpleString(value) => {
             writer.write_all(b"+")?;
+            writer.write_all(&value)?;
+            writer.write_all(b"\r\n")?;
+        }
+        Response::BulkString(value) => {
+            write!(writer, "${}\r\n", value.len())?;
             writer.write_all(&value)?;
             writer.write_all(b"\r\n")?;
         }
@@ -163,24 +173,10 @@ pub fn write_response(writer: &mut impl Write, res: Response) -> anyhow::Result<
         },
         Response::Array(value) => {
             write!(writer, "*{}\r\n", value.len())?;
-            for v in &value {
-                write!(writer, "${}\r\n", v.len())?;
-                writer.write_all(v)?;
-                write!(writer, "\r\n")?;
+            for v in value {
+                write_response(writer, v)?;
             }
         }
-        Response::CommandList(mut value) => {
-            write!(writer, "*{}\r\n", value.len())?;
-            for v in &mut value {
-                write!(writer, "${}\r\n", v.name.len())?;
-                writer.write_all(v.name)?;
-                write_response(writer, Response::Number(v.arity))?;
-                write_response(writer, Response::Array(v.flags.iter().map(|s| s.to_vec()).collect()))?;
-                write_response(writer, Response::Number(v.first_key))?;
-                write_response(writer, Response::Number(v.last_key))?;
-                write_response(writer, Response::Number(v.step))?;
-            }
-        },
         Response::Nil => write!(writer, "$-1\r\n")?,
     }
     Ok(())

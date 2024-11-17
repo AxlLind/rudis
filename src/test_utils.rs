@@ -9,7 +9,7 @@ impl AsResponse for () {
 }
 
 impl AsResponse for &str {
-    fn as_response(s: Self) -> Response { Response::String(s.to_string().into_bytes()) }
+    fn as_response(s: Self) -> Response { Response::SimpleString(s.to_string().into_bytes()) }
 }
 
 impl AsResponse for i64 {
@@ -18,7 +18,7 @@ impl AsResponse for i64 {
 
 impl<const N: usize> AsResponse for [&str; N] {
     fn as_response(s: Self) -> Response {
-        Response::Array(s.iter().map(|x| x.as_bytes().to_vec()).collect())
+        Response::string_array(s.iter().map(|x| x.as_bytes().to_vec()).collect())
     }
 }
 

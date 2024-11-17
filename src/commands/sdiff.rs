@@ -24,7 +24,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     }
     let mut elems = set.into_iter().collect::<Vec<_>>();
     elems.sort();
-    Ok(Response::Array(elems))
+    Ok(Response::string_array(elems))
 }
 
 #[cfg(test)]

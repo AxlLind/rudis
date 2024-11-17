@@ -19,7 +19,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         let (start, stop) = clamp_range(a.len(), start, stop);
         a[start..=stop].to_vec()
     }).unwrap_or_default();
-    Ok(Response::Array(range))
+    Ok(Response::string_array(range))
 }
 
 #[cfg(test)]

@@ -45,9 +45,9 @@ macro_rules! register_commands {
 
         pub static COMMAND_LIST: &[(CommandFn, &CommandInfo)] = &[$(($command::run, &$command::INFO)),+];
 
-        pub static COMMANDS: LazyLock<HashMap<&[u8], CommandFn>> = LazyLock::new(|| {
+        pub static COMMANDS: LazyLock<HashMap<&[u8], (CommandFn, &CommandInfo)>> = LazyLock::new(|| {
             let mut commands = HashMap::new();
-            $(commands.insert($command::INFO.name, $command::run as _);)+
+            $(commands.insert($command::INFO.name, ($command::run as _, &$command::INFO));)+
             commands
         });
     };

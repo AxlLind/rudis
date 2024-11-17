@@ -20,7 +20,7 @@ pub static INFO: CommandInfo = CommandInfo {
 
 pub fn run(_: &mut Database, cmd: Command) -> anyhow::Result<Response> {
     anyhow::ensure!(!cmd.has_more(), "expected no arguments for quit");
-    Ok(Response::String(b"OK".to_vec()))
+    Ok(Response::SimpleString(b"OK".to_vec()))
 }
 
 #[cfg(test)]

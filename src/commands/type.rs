@@ -24,7 +24,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         Some(Value::ZSet(_)) => b"zset",
         None => b"none",
     };
-    Ok(Response::String(t.to_vec()))
+    Ok(Response::SimpleString(t.to_vec()))
 }
 
 #[cfg(test)]

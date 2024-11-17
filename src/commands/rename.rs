@@ -17,7 +17,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, newkey) = cmd.parse_args::<(ByteString, ByteString)>()?;
     let val = db.del(&key).ok_or(anyhow::anyhow!("key does not exist"))?;
     db.set(newkey, val);
-    Ok(Response::String(b"OK".to_vec()))
+    Ok(Response::SimpleString(b"OK".to_vec()))
 }
 
 #[cfg(test)]

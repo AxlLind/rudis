@@ -17,7 +17,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let key = cmd.parse_args::<ByteString>()?;
     let mut members = db.get_set(&key)?.map(|s| s.iter().cloned().collect::<Vec<_>>()).unwrap_or_default();
     members.sort();
-    Ok(Response::Array(members))
+    Ok(Response::string_array(members))
 }
 
 #[cfg(test)]

@@ -23,9 +23,9 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
             let n = a.len().min(n as _);
             let mut x = a.split_off(n);
             std::mem::swap(&mut x, a);
-            Response::Array(x)
+            Response::string_array(x)
         }
-        None => if a.is_empty() { Response::Nil } else { Response::String(a.remove(0)) },
+        None => if a.is_empty() { Response::Nil } else { Response::SimpleString(a.remove(0)) },
     })
 }
 

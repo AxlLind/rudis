@@ -18,7 +18,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, field) = cmd.parse_args::<(ByteString, ByteString)>()?;
     let res = db.get_hash(&key)?
         .and_then(|h| h.get(&field))
-        .map(|v| Response::String(v.clone()))
+        .map(|v| Response::SimpleString(v.clone()))
         .unwrap_or_default();
     Ok(res)
 }

@@ -20,7 +20,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     Ok(match db.get_str(&key)? {
         Some(s) => {
             let prev = std::mem::replace(s, value);
-            Response::String(prev)
+            Response::SimpleString(prev)
         },
         None => {
             db.set(key, Value::String(value));

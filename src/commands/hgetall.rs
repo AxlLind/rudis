@@ -20,7 +20,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         pairs.sort();
         pairs.into_iter().flat_map(|(k, v)| [k, v]).cloned().collect()
     }).unwrap_or_default();
-    Ok(Response::Array(pairs))
+    Ok(Response::string_array(pairs))
 }
 
 #[cfg(test)]
