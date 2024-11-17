@@ -24,6 +24,11 @@ pub static INFO: CommandInfo = CommandInfo {{
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {{
     todo!()
 }}
+
+#[cfg(test)]
+crate::command_test! {{
+    "TODO" => 0;
+}}
 """.lstrip()
 
 
