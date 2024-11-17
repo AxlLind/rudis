@@ -19,3 +19,14 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     anyhow::ensure!(!keys.is_empty(), "expected EXISTS key [key ...]");
     Ok(Response::Number(keys.iter().filter(|&key| db.contains(key)).count() as _))
 }
+
+#[cfg(test)]
+crate::command_test! {
+    "exists x" => 0;
+    "exists a b c " => 0;
+    "set x 1" => "OK";
+    "exists x" => 1;
+    "exists z y x" => 1;
+    "sadd y a" => 1;
+    "exists x y z" => 2;
+}
