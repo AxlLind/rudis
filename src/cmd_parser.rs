@@ -61,16 +61,6 @@ impl<T1: FromArgs, T2: FromArgs, T3: FromArgs> FromArgs for (T1, T2, T3) {
     }
 }
 
-impl<T1: FromArgs, T2: FromArgs, T3: FromArgs, T4: FromArgs> FromArgs for (T1, T2, T3, T4) {
-    fn from_args(cmd: &mut Command) -> anyhow::Result<Self> {
-        let t1 = T1::from_args(cmd)?;
-        let t2 = T2::from_args(cmd)?;
-        let t3 = T3::from_args(cmd)?;
-        let t4 = T4::from_args(cmd)?;
-        Ok((t1, t2, t3, t4))
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Command {
     cmd: String,
