@@ -59,6 +59,8 @@ register_commands! {
     dbsize,
     decr,
     decrby,
+    del,
+    echo,
     exists,
     flushall,
     flushdb,
@@ -113,4 +115,5 @@ register_commands! {
     zcard,
     zcount,
     zrem,
+    zscore,
 }
