@@ -2,27 +2,27 @@ use std::{collections::{BTreeMap, HashMap, HashSet}, fmt::Debug, hash::Hash};
 
 pub struct SortedSet<T, S> {
     map: HashMap<T, S>,
-    rmap: BTreeMap<S, HashSet<T>>,
+    smap: BTreeMap<S, HashSet<T>>,
 }
 
 impl<T: Clone + Eq + Hash, S: Clone + Eq + Hash + Ord> SortedSet<T, S> {
     pub fn new() -> Self {
-        Self { map: HashMap::new(), rmap: BTreeMap::new() }
+        Self { map: HashMap::new(), smap: BTreeMap::new() }
     }
 
     pub fn insert(&mut self, t: T, s: S) -> Option<S> {
         let old_s = self.map.insert(t.clone(), s.clone());
         if let Some(old_s) = &old_s {
-            self.rmap.get_mut(old_s).unwrap().remove(&t);
+            self.smap.get_mut(old_s).unwrap().remove(&t);
         }
-        self.rmap.entry(s).or_default().insert(t);
+        self.smap.entry(s).or_default().insert(t);
         old_s
     }
 
     pub fn remove(&mut self, t: &T) -> Option<S> {
         let s = self.map.remove(t);
         if let Some(s) = &s {
-            self.rmap.get_mut(s).unwrap().remove(&t);
+            self.smap.get_mut(s).unwrap().remove(&t);
         }
         s
     }
@@ -34,11 +34,15 @@ impl<T: Clone + Eq + Hash, S: Clone + Eq + Hash + Ord> SortedSet<T, S> {
     }
 
     pub fn iter(&self) -> impl Iterator<Item=(&T, &S)> {
-        self.rmap.iter().flat_map(|(s, set)| set.iter().map(move |t| (t, s)))
+        self.smap.iter().flat_map(|(s, set)| set.iter().map(move |t| (t, s)))
     }
 
     pub fn riter(&self) -> impl Iterator<Item=(&T, &S)> {
-        self.rmap.iter().rev().flat_map(|(s, set)| set.iter().map(move |t| (t, s)))
+        self.smap.iter().rev().flat_map(|(s, set)| set.iter().map(move |t| (t, s)))
+    }
+
+    pub fn range(&self, min: S, max: S) -> impl Iterator<Item=(&T, &S)> {
+        self.smap.range(min..=max).flat_map(|(s, set)| set.iter().map(move |t| (t, s)))
     }
 }
 
@@ -47,7 +51,7 @@ impl<T: Clone, S: Clone> Clone for SortedSet<T, S> {
     fn clone(&self) -> Self {
         Self {
             map: self.map.clone(),
-            rmap: self.rmap.clone(),
+            smap: self.smap.clone(),
         }
     }
 }
