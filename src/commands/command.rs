@@ -45,7 +45,7 @@ pub fn run(_: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
                 None => COMMAND_LIST.iter().map(|&(_, info)| info_response(info)).collect(),
             })
         },
-        Some(b"list") => anyhow::bail!("unimplemented"),
+        Some(b"list") => Response::string_array(COMMAND_LIST.iter().map(|(_, info)| info.name.to_vec())),
         Some(_) => anyhow::bail!("invalid subcommand"),
         None => Response::Array(COMMAND_LIST.iter().map(|&(_, info)| info_response(info)).collect()),
     };
