@@ -47,11 +47,11 @@ def instantiate_cmd(info: list[Any]) -> None:
 
     print('adding to command list in mod.rs')
     modrs = REPO_ROOT / 'src' / 'commands' / 'mod.rs'
-    lines = modrs.read_text().replace('r#type', 'type').splitlines()
+    lines = modrs.read_text().splitlines()
     i = lines.index('register_commands! {') + 1
     j = i + lines[i:].index('}')
-    commands = sorted(lines[i:j-1] + [f'    {name},'])
-    modrs.write_text('\n'.join(lines[:i] + commands + lines[j:]).replace('    type,', '    r#type,') + '\n')
+    commands = sorted(lines[i:j] + [f'    {name},'], key=lambda c: c.strip().removeprefix('r#'))
+    modrs.write_text('\n'.join(lines[:i] + commands + lines[j:]) + '\n')
 
 
 def main() -> None:
