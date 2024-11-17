@@ -16,16 +16,16 @@ pub static INFO: CommandInfo = CommandInfo {
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, count) = cmd.parse_args::<(ByteString, Option<i64>)>()?;
-    let Some(list) = db.get_list(&key)? else { return Ok(Response::Nil) };
+    let Some(a) = db.get_array(&key)? else { return Ok(Response::Nil) };
     Ok(match count {
         Some(n) if n < 0 => anyhow::bail!("value is out of range, must be positive"),
         Some(n) => {
-            let n = list.len().min(n as _);
-            let mut x = list.split_off(n);
-            std::mem::swap(&mut x, list);
+            let n = a.len().min(n as _);
+            let mut x = a.split_off(n);
+            std::mem::swap(&mut x, a);
             Response::Array(x)
         }
-        None => if list.is_empty() { Response::Nil } else { Response::String(list.remove(0)) },
+        None => if a.is_empty() { Response::Nil } else { Response::String(a.remove(0)) },
     })
 }
 

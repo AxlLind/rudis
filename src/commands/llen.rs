@@ -16,7 +16,7 @@ pub static INFO: CommandInfo = CommandInfo {
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let key = cmd.parse_args::<ByteString>()?;
-    let len = db.get_list(&key)?.map(|l| l.len()).unwrap_or(0);
+    let len = db.get_array(&key)?.map(|a| a.len()).unwrap_or(0);
     Ok(Response::Number(len as _))
 }
 

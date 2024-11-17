@@ -1,6 +1,6 @@
 use super::CommandInfo;
 use crate::cmd_parser::Command;
-use crate::{ByteString, Database, Response, Value};
+use crate::{ByteString, Database, Response};
 
 pub static INFO: CommandInfo = CommandInfo {
     name: b"append",
@@ -17,18 +17,9 @@ pub static INFO: CommandInfo = CommandInfo {
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, value) = cmd.parse_args::<(ByteString, ByteString)>()?;
-    let len = match db.get_str(&key)? {
-        Some(v) => {
-            v.extend(value);
-            v.len()
-        }
-        None => {
-            let len = value.len();
-            db.set(key, Value::String(value));
-            len
-        }
-    };
-    Ok(Response::Number(len as _))
+    let v = db.get_or_insert_str(key)?;
+    v.extend(value);
+    Ok(Response::Number(v.len() as _))
 }
 
 #[cfg(test)]

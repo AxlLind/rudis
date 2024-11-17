@@ -1,6 +1,6 @@
 use super::CommandInfo;
 use crate::cmd_parser::Command;
-use crate::{Value, ByteString, Database, Response};
+use crate::{ByteString, Database, Response};
 
 pub static INFO: CommandInfo = CommandInfo {
     name: b"lpush",
@@ -16,22 +16,13 @@ pub static INFO: CommandInfo = CommandInfo {
 };
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
-    let (key, mut elements) = cmd.parse_args::<(ByteString, Vec<ByteString>)>()?;
+    let (key, elements) = cmd.parse_args::<(ByteString, Vec<ByteString>)>()?;
     anyhow::ensure!(!elements.is_empty(), "expected LPUSH key element [element ...]");
-    Ok(match db.get_list(&key)? {
-        Some(list) => {
-            for e in elements {
-                list.insert(0, e);
-            }
-            Response::Number(list.len() as _)
-        }
-        None => {
-            let len = elements.len();
-            elements.reverse();
-            db.set(key, Value::Array(elements));
-            Response::Number(len as _)
-        }
-    })
+    let a = db.get_or_insert_array(key)?;
+    for e in elements {
+        a.insert(0, e);
+    }
+    Ok(Response::Number(a.len() as _))
 }
 
 #[cfg(test)]

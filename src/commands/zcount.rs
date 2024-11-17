@@ -16,7 +16,7 @@ pub static INFO: CommandInfo = CommandInfo {
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, min, max) = cmd.parse_args::<(ByteString, i64, i64)>()?;
-    let count = db.get_zset(&key)?.map(|s| s.range(min, max).count()).unwrap_or(0);
+    let count = db.get_zset(&key)?.map(|z| z.range(min, max).count()).unwrap_or(0);
     Ok(Response::Number(count as _))
 }
 

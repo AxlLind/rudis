@@ -29,6 +29,10 @@ pub enum Response {
     Nil,
 }
 
+impl Default for Response {
+    fn default() -> Self { Self::Nil }
+}
+
 #[derive(Default)]
 pub struct Database {
     state: HashMap<ByteString, Value>
@@ -47,10 +51,10 @@ impl Database {
         }
     }
 
-    pub fn get_list(&mut self, key: &[u8]) -> anyhow::Result<Option<&mut Vec<ByteString>>> {
+    pub fn get_array(&mut self, key: &[u8]) -> anyhow::Result<Option<&mut Vec<ByteString>>> {
         match self.get(key) {
             Some(Value::Array(v)) => Ok(Some(v)),
-            Some(_) => anyhow::bail!("expected list value"),
+            Some(_) => anyhow::bail!("expected array value"),
             None => Ok(None)
         }
     }
@@ -58,7 +62,7 @@ impl Database {
     pub fn get_hash(&mut self, key: &[u8]) -> anyhow::Result<Option<&mut HashMap<ByteString, ByteString>>> {
         match self.get(key) {
             Some(Value::Hash(v)) => Ok(Some(v)),
-            Some(_) => anyhow::bail!("expected set value"),
+            Some(_) => anyhow::bail!("expected hash value"),
             None => Ok(None)
         }
     }
@@ -74,8 +78,48 @@ impl Database {
     pub fn get_zset(&mut self, key: &[u8]) -> anyhow::Result<Option<&mut SortedSet<ByteString, i64>>> {
         match self.get(key) {
             Some(Value::ZSet(v)) => Ok(Some(v)),
-            Some(_) => anyhow::bail!("expected set value"),
+            Some(_) => anyhow::bail!("expected zset value"),
             None => Ok(None)
+        }
+    }
+
+    pub fn get_or_insert_str(&mut self, key: Vec<u8>) -> anyhow::Result<&mut ByteString> {
+        let v = self.state.entry(key).or_insert_with(|| Value::String(Vec::new()));
+        match v {
+            Value::String(v) => Ok(v),
+            _ => anyhow::bail!("expected string value"),
+        }
+    }
+
+    pub fn get_or_insert_array(&mut self, key: Vec<u8>) -> anyhow::Result<&mut Vec<ByteString>> {
+        let v = self.state.entry(key).or_insert_with(|| Value::Array(Vec::new()));
+        match v {
+            Value::Array(v) => Ok(v),
+            _ => anyhow::bail!("expected array value"),
+        }
+    }
+
+    pub fn get_or_insert_hash(&mut self, key: Vec<u8>) -> anyhow::Result<&mut HashMap<ByteString, ByteString>> {
+        let v = self.state.entry(key).or_insert_with(|| Value::Hash(HashMap::new()));
+        match v {
+            Value::Hash(v) => Ok(v),
+            _ => anyhow::bail!("expected hash value"),
+        }
+    }
+
+    pub fn get_or_insert_set(&mut self, key: Vec<u8>) -> anyhow::Result<&mut HashSet<ByteString>> {
+        let v = self.state.entry(key).or_insert_with(|| Value::Set(HashSet::new()));
+        match v {
+            Value::Set(v) => Ok(v),
+            _ => anyhow::bail!("expected set value"),
+        }
+    }
+
+    pub fn get_or_insert_zset(&mut self, key: Vec<u8>) -> anyhow::Result<&mut SortedSet<ByteString, i64>> {
+        let v = self.state.entry(key).or_insert_with(|| Value::ZSet(SortedSet::new()));
+        match v {
+            Value::ZSet(v) => Ok(v),
+            _ => anyhow::bail!("expected zset value"),
         }
     }
 

@@ -15,7 +15,9 @@ pub static INFO: CommandInfo = CommandInfo {
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let key = cmd.parse_args::<ByteString>()?;
-    let mut keys = db.get_hash(&key)?.map(|h| h.keys().cloned().collect::<Vec<_>>()).unwrap_or_default();
+    let mut keys = db.get_hash(&key)?
+        .map(|h| h.keys().cloned().collect::<Vec<_>>())
+        .unwrap_or_default();
     keys.sort();
     Ok(Response::Array(keys))
 }

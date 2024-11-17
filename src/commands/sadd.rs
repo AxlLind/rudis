@@ -1,6 +1,6 @@
 use super::CommandInfo;
 use crate::cmd_parser::Command;
-use crate::{ByteString, Database, Response, Value};
+use crate::{ByteString, Database, Response};
 
 pub static INFO: CommandInfo = CommandInfo {
     name: b"sadd",
@@ -18,18 +18,10 @@ pub static INFO: CommandInfo = CommandInfo {
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, elems) = cmd.parse_args::<(ByteString, Vec<ByteString>)>()?;
     anyhow::ensure!(!elems.is_empty(), "expected SADD member [member ...]");
-    match db.get_set(&key)? {
-        Some(set) => {
-            let prelen = set.len();
-            set.extend(elems);
-            Ok(Response::Number((set.len() - prelen) as _))
-        }
-        None => {
-            let len = elems.len();
-            db.set(key, Value::Set(elems.into_iter().collect()));
-            Ok(Response::Number(len as _))
-        }
-    }
+    let s = db.get_or_insert_set(key)?;
+    let prelen = s.len();
+    s.extend(elems);
+    Ok(Response::Number((s.len() - prelen) as _))
 }
 
 #[cfg(test)]

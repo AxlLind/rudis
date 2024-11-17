@@ -15,13 +15,11 @@ pub static INFO: CommandInfo = CommandInfo {
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, start, stop) = cmd.parse_args::<(ByteString, i64, i64)>()?;
-    Ok(match db.get_list(&key)? {
-        Some(list) => {
-            let (start, stop) = clamp_range(list.len(), start, stop);
-            Response::Array(list[start..=stop].to_vec())
-        }
-        None => Response::Array(Vec::new()),
-    })
+    let range = db.get_array(&key)?.map(|a| {
+        let (start, stop) = clamp_range(a.len(), start, stop);
+        a[start..=stop].to_vec()
+    }).unwrap_or_default();
+    Ok(Response::Array(range))
 }
 
 #[cfg(test)]

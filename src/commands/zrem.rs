@@ -18,7 +18,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, members) = cmd.parse_args::<(ByteString, Vec<ByteString>)>()?;
     anyhow::ensure!(!members.is_empty(), "expected ZREM key member [member..]");
     let removed = db.get_zset(&key)?
-        .map(|s| members.iter().filter_map(|m| s.remove(m)).count())
+        .map(|z| members.iter().filter_map(|m| z.remove(m)).count())
         .unwrap_or(0);
     Ok(Response::Number(removed as _))
 }

@@ -1,7 +1,6 @@
 use super::CommandInfo;
 use crate::cmd_parser::Command;
-use crate::sorted_set::SortedSet;
-use crate::{ByteString, Database, Response, Value};
+use crate::{ByteString, Database, Response};
 
 pub static INFO: CommandInfo = CommandInfo {
     name: b"zadd",
@@ -18,18 +17,12 @@ pub static INFO: CommandInfo = CommandInfo {
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, members) = cmd.parse_args::<(ByteString, Vec<(i64, ByteString)>)>()?;
-    let new = match db.get_zset(&key)? {
-        Some(s) => {
-            members.into_iter().map(|(score, v)| !s.insert(v, score).is_some()).filter(|&b| b).count()
-        }
-        None => {
-            let mut s = SortedSet::new();
-            let new = members.into_iter().map(|(score, v)| !s.insert(v, score).is_some()).filter(|&b| b).count();
-            db.set(key, Value::ZSet(s));
-            new
-        }
-    };
-    Ok(Response::Number(new as _))
+    let z = db.get_or_insert_zset(key)?;
+    let added = members.into_iter()
+        .map(|(score, v)| !z.insert(v, score).is_some())
+        .filter(|&b| b)
+        .count();
+    Ok(Response::Number(added as _))
 }
 
 #[cfg(test)]

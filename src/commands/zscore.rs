@@ -17,9 +17,9 @@ pub static INFO: CommandInfo = CommandInfo {
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, member) = cmd.parse_args::<(ByteString, ByteString)>()?;
     let res = db.get_zset(&key)?
-        .and_then(|s| s.get_score(&member))
+        .and_then(|z| z.get_score(&member))
         .map(|score| Response::Number(score))
-        .unwrap_or(Response::Nil);
+        .unwrap_or_default();
     Ok(res)
 }
 

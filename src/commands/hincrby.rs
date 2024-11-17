@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
 use super::{int_from_bytes, CommandInfo};
 use crate::cmd_parser::Command;
-use crate::{ByteString, Database, Response, Value};
+use crate::{ByteString, Database, Response};
 
 pub static INFO: CommandInfo = CommandInfo {
     name: b"hincrby",
@@ -19,20 +17,10 @@ pub static INFO: CommandInfo = CommandInfo {
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, field, increment) = cmd.parse_args::<(ByteString, ByteString, i64)>()?;
-    let v = match db.get_hash(&key)? {
-        Some(h) => {
-            let n = h.get(&field).map_or(Ok(0), |v| int_from_bytes(v))? + increment;
-            h.insert(field, n.to_string().into_bytes());
-            n
-        }
-        None => {
-            let mut h = HashMap::new();
-            h.insert(field, increment.to_string().into_bytes());
-            db.set(key, Value::Hash(h));
-            increment
-        }
-    };
-    Ok(Response::Number(v))
+    let h = db.get_or_insert_hash(key)?;
+    let n = h.get(&field).map_or(Ok(0), |v| int_from_bytes(v))? + increment;
+    h.insert(field, n.to_string().into_bytes());
+    Ok(Response::Number(n))
 }
 
 #[cfg(test)]

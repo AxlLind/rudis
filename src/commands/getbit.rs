@@ -17,14 +17,14 @@ pub static INFO: CommandInfo = CommandInfo {
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, offset) = cmd.parse_args::<(ByteString, i64)>()?;
     anyhow::ensure!(offset >= 0, "offset cannot be negative");
-    Ok(match db.get_str(&key)? {
-        Some(s) => {
+    let bit = db.get_str(&key)?
+        .and_then(|s| {
             let i = (offset >> 3) as usize;
             let j = 7 - (offset & 0x7) as usize;
-            Response::Number(s.get(i).map(|x| (x >> j) & 1).unwrap_or(0) as _)
-        }
-        None => Response::Number(0),
-    })
+            s.get(i).map(|x| (x >> j) & 1)
+        })
+        .unwrap_or(0);
+    Ok(Response::Number(bit as _))
 }
 
 #[cfg(test)]

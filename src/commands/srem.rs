@@ -17,8 +17,9 @@ pub static INFO: CommandInfo = CommandInfo {
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, members) = cmd.parse_args::<(ByteString, Vec<ByteString>)>()?;
     anyhow::ensure!(!members.is_empty(), "expected SREM key member [member ...]");
-    let Some(set) = db.get_set(&key)? else { return Ok(Response::Number(0)) };
-    let removed = members.iter().filter(|&m| set.remove(m)).count();
+    let removed = db.get_set(&key)?
+        .map(|s| members.iter().filter(|&m| s.remove(m)).count())
+        .unwrap_or(0);
     Ok(Response::Number(removed as _))
 }
 

@@ -1,8 +1,6 @@
-use std::collections::HashSet;
-
 use super::CommandInfo;
 use crate::cmd_parser::Command;
-use crate::{ByteString, Database, Response, Value};
+use crate::{ByteString, Database, Response};
 
 pub static INFO: CommandInfo = CommandInfo {
     name: b"smove",
@@ -23,11 +21,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     if !src_set.remove(&member) {
         return Ok(Response::Number(0));
     }
-
-    match db.get_set(&dst)? {
-        Some(dst_set) => { dst_set.insert(member); }
-        None => { db.set(dst, Value::Set(HashSet::from([member]))); }
-    }
+    db.get_or_insert_set(dst)?.insert(member);
     Ok(Response::Number(1))
 }
 

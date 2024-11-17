@@ -16,15 +16,15 @@ pub static INFO: CommandInfo = CommandInfo {
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, count) = cmd.parse_args::<(ByteString, Option<i64>)>()?;
-    let Some(list) = db.get_list(&key)? else { return Ok(Response::Nil) };
+    let Some(a) = db.get_array(&key)? else { return Ok(Response::Nil) };
     Ok(match count {
         Some(n) if n < 0 => anyhow::bail!("value is out of range, must be positive"),
         Some(n) => {
-            let n = list.len().min(n as _);
-            let v = (0..n).map(|_| list.pop().unwrap()).collect();
+            let n = a.len().min(n as _);
+            let v = (0..n).map(|_| a.pop().unwrap()).collect();
             Response::Array(v)
         }
-        None => list.pop().map(|v| Response::String(v)).unwrap_or(Response::Nil),
+        None => a.pop().map(|v| Response::String(v)).unwrap_or(Response::Nil),
     })
 }
 

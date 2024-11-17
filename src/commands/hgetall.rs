@@ -15,14 +15,11 @@ pub static INFO: CommandInfo = CommandInfo {
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let key = cmd.parse_args::<ByteString>()?;
-    let pairs = match db.get_hash(&key)? {
-        Some(h) => {
-            let mut pairs = h.iter().collect::<Vec<_>>();
-            pairs.sort();
-            pairs.into_iter().flat_map(|(k, v)| [k, v]).cloned().collect()
-        },
-        None => Vec::new(),
-    };
+    let pairs = db.get_hash(&key)?.map(|h| {
+        let mut pairs = h.iter().collect::<Vec<_>>();
+        pairs.sort();
+        pairs.into_iter().flat_map(|(k, v)| [k, v]).cloned().collect()
+    }).unwrap_or_default();
     Ok(Response::Array(pairs))
 }
 

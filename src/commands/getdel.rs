@@ -16,13 +16,11 @@ pub static INFO: CommandInfo = CommandInfo {
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let key = cmd.parse_args::<ByteString>()?;
-    Ok(match db.get_str(&key)?.cloned() {
-        Some(s) => {
-            db.del(&key);
-            Response::String(s)
-        },
-        None => Response::Nil,
-    })
+    let res = db.get_str(&key)?.cloned().map(|s| {
+        db.del(&key);
+        Response::String(s)
+    }).unwrap_or_default();
+    Ok(res)
 }
 
 #[cfg(test)]

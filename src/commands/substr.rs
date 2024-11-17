@@ -1,6 +1,6 @@
-use super::{clamp_range, CommandInfo};
+use super::CommandInfo;
 use crate::cmd_parser::Command;
-use crate::{ByteString, Database, Response};
+use crate::{Database, Response};
 
 pub static INFO: CommandInfo = CommandInfo {
     name: b"substr",
@@ -13,15 +13,9 @@ pub static INFO: CommandInfo = CommandInfo {
     step: 1,
 };
 
-pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
-    let (key, start, stop) = cmd.parse_args::<(ByteString, i64, i64)>()?;
-    Ok(match db.get_str(&key)? {
-        Some(list) => {
-            let (start, stop) = clamp_range(list.len(), start, stop);
-            Response::String(list[start..=stop].to_vec())
-        }
-        None => Response::String(Vec::new()),
-    })
+pub fn run(db: &mut Database, cmd: Command) -> anyhow::Result<Response> {
+    // deprecated alias for getrange
+    crate::commands::getrange::run(db, cmd)
 }
 
 #[cfg(test)]

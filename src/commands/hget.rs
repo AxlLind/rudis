@@ -19,7 +19,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let res = db.get_hash(&key)?
         .and_then(|h| h.get(&field))
         .map(|v| Response::String(v.clone()))
-        .unwrap_or(Response::Nil);
+        .unwrap_or_default();
     Ok(res)
 }
 

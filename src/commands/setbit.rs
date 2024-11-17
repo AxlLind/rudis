@@ -1,6 +1,6 @@
 use super::CommandInfo;
 use crate::cmd_parser::Command;
-use crate::{ByteString, Database, Response, Value};
+use crate::{ByteString, Database, Response};
 
 pub static INFO: CommandInfo = CommandInfo {
     name: b"setbit",
@@ -34,15 +34,8 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     anyhow::ensure!(offset >= 0, "offset cannot be negative");
     anyhow::ensure!(offset < u32::MAX as _, "offset larger than 2^32");
     anyhow::ensure!(value == 0 || value == 1, "invalid value");
-    let bit = match db.get_str(&key)? {
-        Some(s) => set_bit(s, offset, value),
-        None => {
-            let mut s = Vec::new();
-            let bit = set_bit(&mut s, offset, value);
-            db.set(key, Value::String(s));
-            bit
-        }
-    };
+    let s = db.get_or_insert_str(key)?;
+    let bit = set_bit(s, offset, value);
     Ok(Response::Number(bit as _))
 }
 
