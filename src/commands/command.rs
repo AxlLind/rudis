@@ -35,8 +35,11 @@ pub fn run(_: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
         Some(b"INFO") => {
             let cmds = cmd.parse_args::<Option<Vec<ByteString>>>()?;
             Response::Array(match cmds {
-                Some(cmds) => cmds.iter().map(|c| COMMANDS[c.as_slice()].1).map(info_response).collect(),
-                None => COMMAND_LIST.iter().map(|&(_, info)| info).map(info_response).collect(),
+                Some(cmds) => cmds.iter()
+                    .map(|c| COMMANDS.get(c.as_slice())
+                    .map(|(_, info)| info_response(info)).unwrap_or_default())
+                    .collect(),
+                None => COMMAND_LIST.iter().map(|&(_, info)| info_response(info)).collect(),
             })
         },
         Some(b"LIST") => anyhow::bail!("unimplemented"),
