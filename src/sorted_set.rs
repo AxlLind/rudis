@@ -5,10 +5,13 @@ pub struct SortedSet<T, S> {
     smap: BTreeMap<S, HashSet<T>>,
 }
 
-impl<T: Clone + Eq + Hash, S: Clone + Eq + Hash + Ord> SortedSet<T, S> {
+impl<T, S> SortedSet<T, S> {
     pub fn new() -> Self {
         Self { map: HashMap::new(), smap: BTreeMap::new() }
     }
+}
+
+impl<T: Clone + Eq + Hash, S: Clone + Eq + Hash + Ord> SortedSet<T, S> {
 
     pub fn insert(&mut self, t: T, s: S) -> Option<S> {
         let old_s = self.map.insert(t.clone(), s.clone());
@@ -22,7 +25,7 @@ impl<T: Clone + Eq + Hash, S: Clone + Eq + Hash + Ord> SortedSet<T, S> {
     pub fn remove(&mut self, t: &T) -> Option<S> {
         let s = self.map.remove(t);
         if let Some(s) = &s {
-            self.smap.get_mut(s).unwrap().remove(&t);
+            self.smap.get_mut(s).unwrap().remove(t);
         }
         s
     }
@@ -46,6 +49,9 @@ impl<T: Clone + Eq + Hash, S: Clone + Eq + Hash + Ord> SortedSet<T, S> {
     }
 }
 
+impl<T: Default, S: Default> Default for SortedSet<T, S> {
+    fn default() -> Self { Self::new() }
+}
 
 impl<T: Clone, S: Clone> Clone for SortedSet<T, S> {
     fn clone(&self) -> Self {

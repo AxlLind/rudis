@@ -23,7 +23,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
             let n = a.len().min(n as _);
             Response::string_array((0..n).map(|_| a.pop().unwrap()))
         }
-        None => a.pop().map(|v| Response::SimpleString(v)).unwrap_or(Response::Nil),
+        None => a.pop().map(Response::SimpleString).unwrap_or(Response::Nil),
     })
 }
 

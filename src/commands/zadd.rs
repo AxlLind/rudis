@@ -19,7 +19,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, members) = cmd.parse_args::<(ByteString, Vec<(i64, ByteString)>)>()?;
     let z = db.get_or_insert_zset(key)?;
     let added = members.into_iter()
-        .map(|(score, v)| !z.insert(v, score).is_some())
+        .map(|(score, v)| z.insert(v, score).is_none())
         .filter(|&b| b)
         .count();
     Ok(Response::Number(added as _))
