@@ -2,7 +2,7 @@ use std::net::TcpListener;
 use std::io::{BufReader, BufWriter, Write};
 use anyhow::{self, Context};
 
-use redis_in_rust::{Database, Parser, execute_command, write_response};
+use rudis::{Database, Parser, execute_command, write_response};
 
 fn main() -> anyhow::Result<()> {
     let listener = TcpListener::bind(("0.0.0.0", 8888))?;
