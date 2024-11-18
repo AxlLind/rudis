@@ -37,6 +37,19 @@ pub struct CommandInfo {
     pub step: i64,
 }
 
+impl CommandInfo {
+    pub fn as_response(&self) -> Response {
+        Response::Array(vec![
+            Response::BulkString(self.name.to_vec()),
+            Response::Number(self.arity),
+            Response::string_array(self.flags.iter().map(|s| s.to_vec())),
+            Response::Number(self.first_key),
+            Response::Number(self.last_key),
+            Response::Number(self.step),
+        ])
+    }
+}
+
 type CommandFn = fn(&mut Database, Command) -> anyhow::Result<Response>;
 
 macro_rules! register_commands {

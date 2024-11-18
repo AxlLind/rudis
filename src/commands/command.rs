@@ -14,17 +14,6 @@ pub static INFO: CommandInfo = CommandInfo {
     step: 0,
 };
 
-fn info_response(info: &CommandInfo) -> Response {
-    Response::Array(vec![
-        Response::BulkString(info.name.to_vec()),
-        Response::Number(info.arity),
-        Response::string_array(info.flags.iter().map(|s| s.to_vec())),
-        Response::Number(info.first_key),
-        Response::Number(info.last_key),
-        Response::Number(info.step),
-    ])
-}
-
 pub fn run(_: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let mut subcommand = cmd.parse_partial_args::<Option<ByteString>>()?;
     if let Some(cmd) = &mut subcommand {
@@ -40,14 +29,14 @@ pub fn run(_: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
             Response::Array(match cmds {
                 Some(cmds) => cmds.iter()
                     .map(|c| COMMANDS.get(c.as_slice())
-                    .map(|(_, info)| info_response(info)).unwrap_or_default())
+                    .map(|(_, info)| info.as_response()).unwrap_or_default())
                     .collect(),
-                None => COMMAND_LIST.iter().map(|&(_, info)| info_response(info)).collect(),
+                None => COMMAND_LIST.iter().map(|&(_, info)| info.as_response()).collect(),
             })
         },
         Some(b"list") => Response::string_array(COMMAND_LIST.iter().map(|(_, info)| info.name.to_vec())),
         Some(_) => anyhow::bail!("invalid subcommand"),
-        None => Response::Array(COMMAND_LIST.iter().map(|&(_, info)| info_response(info)).collect()),
+        None => Response::Array(COMMAND_LIST.iter().map(|&(_, info)| info.as_response()).collect()),
     };
     Ok(res)
 }
