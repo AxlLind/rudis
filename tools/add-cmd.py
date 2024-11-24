@@ -34,7 +34,7 @@ crate::command_test! {{
 
 def instantiate_cmd(info: list[Any]) -> None:
     name, arity, flags, first_key, last_key, step, *_ = info
-    f = REPO_ROOT / 'src' / 'commands' / f'{name}.rs'
+    f = REPO_ROOT / 'rudis-core' / 'src' / 'commands' / f'{name}.rs'
     print(f'instantiating: {f.relative_to(REPO_ROOT)}')
     flags = "\n        ".join(f'b"{f}",' for f in flags)
     if flags:
@@ -51,7 +51,7 @@ def instantiate_cmd(info: list[Any]) -> None:
     )
 
     print('adding to command list in mod.rs')
-    modrs = REPO_ROOT / 'src' / 'commands' / 'mod.rs'
+    modrs = REPO_ROOT / 'rudis-core' / 'src' / 'commands' / 'mod.rs'
     lines = modrs.read_text().splitlines()
     i = lines.index('register_commands! {') + 1
     j = i + lines[i:].index('}')
