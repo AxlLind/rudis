@@ -47,12 +47,12 @@ async fn handle_connection(stream: TcpStream, db_tx: Sender<(Sender<anyhow::Resu
     ).await;
 }
 
-async fn database_task(rx: Receiver<(Sender<anyhow::Result<Response>>, Command)>) -> anyhow::Result<()> {
+async fn database_task(rx: Receiver<(Sender<anyhow::Result<Response>>, Command)>) {
     let mut db = Database::default();
     loop {
-        let (tx, cmd) = rx.recv().await?;
+        let (tx, cmd) = rx.recv().await.expect("failed to read from command queue");
         let res = execute_command(&mut db, cmd);
-        tx.send(res).await?;
+        let _ = tx.send(res).await;
     }
 }
 
