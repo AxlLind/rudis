@@ -78,37 +78,33 @@ impl<R: AsyncRead + Unpin> Parser<R> {
 
 #[cfg(test)]
 mod test {
+    use macro_rules_attribute::apply;
+    use smol_macros::test;
     use super::*;
 
-    #[test]
-    fn test_parse_array() {
-        smol::block_on(async {
-            let mut res = Parser::new(b"*2\r\n$3\r\nFOO\r\n$3\r\nbar\r\n".as_slice()).read_command().await.unwrap();
-            assert_eq!(res.cmd(), "foo");
-            assert_eq!(res.parse_args::<ByteString>().unwrap(), b"bar".to_vec());
-        })
+    #[apply(test!)]
+    async fn test_parse_array() {
+        let mut res = Parser::new(b"*2\r\n$3\r\nFOO\r\n$3\r\nbar\r\n".as_slice()).read_command().await.unwrap();
+        assert_eq!(res.cmd(), "foo");
+        assert_eq!(res.parse_args::<ByteString>().unwrap(), b"bar".to_vec());
     }
 
-    #[test]
-    fn test_parse_empty_array() {
-        smol::block_on(async {
-            assert!(Parser::new(b"*0\r\n".as_slice()).read_command().await.is_err());
-        })
+    #[apply(test!)]
+    async fn test_parse_empty_array() {
+        assert!(Parser::new(b"*0\r\n".as_slice()).read_command().await.is_err());
     }
 
-    #[test]
-    fn test_parse_pipelined_arrays() {
-        smol::block_on(async {
-            let mut parser = Parser::new(b"*1\r\n$1\r\nA\r\n*3\r\n$4\r\nABCD\r\n$0\r\n\r\n$2\r\nxx\r\n".as_slice());
-            let mut res = parser.read_command().await.unwrap();
-            assert_eq!(res.cmd(), "a");
-            assert!(res.parse_args::<Vec<ByteString>>().unwrap().is_empty());
+    #[apply(test!)]
+    async fn test_parse_pipelined_arrays() {
+        let mut parser = Parser::new(b"*1\r\n$1\r\nA\r\n*3\r\n$4\r\nABCD\r\n$0\r\n\r\n$2\r\nxx\r\n".as_slice());
+        let mut res = parser.read_command().await.unwrap();
+        assert_eq!(res.cmd(), "a");
+        assert!(res.parse_args::<Vec<ByteString>>().unwrap().is_empty());
 
-            let mut res = parser.read_command().await.unwrap();
-            assert_eq!(res.cmd(), "abcd");
-            assert_eq!(res.parse_args::<(ByteString, ByteString)>().unwrap(), (b"".to_vec(), b"xx".to_vec()));
+        let mut res = parser.read_command().await.unwrap();
+        assert_eq!(res.cmd(), "abcd");
+        assert_eq!(res.parse_args::<(ByteString, ByteString)>().unwrap(), (b"".to_vec(), b"xx".to_vec()));
 
-            assert!(parser.read_command().await.is_err())
-        })
+        assert!(parser.read_command().await.is_err())
     }
 }

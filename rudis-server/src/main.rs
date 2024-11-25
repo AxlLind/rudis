@@ -1,10 +1,12 @@
-use anyhow::{self, Context};
-use smol::channel::{Receiver, Sender};
-
 use std::io::Write;
-use rudis::{execute_command, write_response, Command, Database, Response};
-use smol::net::{TcpListener, TcpStream};
+use anyhow::{self, Context};
+use macro_rules_attribute::apply;
+use smol_macros::main;
+use smol::channel::{Receiver, Sender};
 use smol::io::{AsyncRead, AsyncWriteExt, BufReader};
+use smol::net::{TcpListener, TcpStream};
+
+use rudis::{execute_command, write_response, Command, Database, Response};
 
 mod cmd_parser;
 use cmd_parser::Parser;
@@ -55,14 +57,13 @@ async fn database_task(db_rx: Receiver<(Sender<anyhow::Result<Response>>, Comman
     }
 }
 
-fn main() -> anyhow::Result<()> {
-    smol::block_on(async {
-        let listener = TcpListener::bind(("0.0.0.0", 8888)).await?;
-        let (db_tx, db_rx) = smol::channel::bounded(1024);
-        smol::spawn(database_task(db_rx)).detach();
-        loop {
-            let (stream, _) = listener.accept().await?;
-            smol::spawn(handle_connection(stream, db_tx.clone())).detach();
-        }
-    })
+#[apply(main!)]
+async fn main() -> anyhow::Result<()> {
+    let listener = TcpListener::bind(("0.0.0.0", 8888)).await?;
+    let (db_tx, db_rx) = smol::channel::bounded(1024);
+    smol::spawn(database_task(db_rx)).detach();
+    loop {
+        let (stream, _) = listener.accept().await?;
+        smol::spawn(handle_connection(stream, db_tx.clone())).detach();
+    }
 }
