@@ -11,10 +11,11 @@ mod cmd_parser;
 use cmd_parser::Parser;
 
 async fn read_command_task(
-    mut parser: Parser<BufReader<TcpStream>>,
+    stream: TcpStream,
     db_tx: Sender<(Sender<anyhow::Result<Response>>, Command)>,
     tx: Sender<anyhow::Result<Response>>,
 ) -> anyhow::Result<()> {
+    let mut parser = Parser::new(BufReader::new(stream));
     loop {
         match parser.read_command().await {
             Ok(cmd) => {
@@ -39,10 +40,9 @@ async fn send_response_task(mut stream: TcpStream, rx: Receiver<anyhow::Result<R
 }
 
 async fn handle_connection(stream: TcpStream, db_tx: Sender<(Sender<anyhow::Result<Response>>, Command)>) {
-    let parser = Parser::new(BufReader::new(stream.clone()));
     let (tx, rx) = smol::channel::bounded(128);
     let _ = smol::future::zip(
-        read_command_task(parser, db_tx, tx),
+        read_command_task(stream.clone(), db_tx, tx),
         send_response_task(stream, rx),
     ).await;
 }
