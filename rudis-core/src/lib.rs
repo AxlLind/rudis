@@ -5,7 +5,7 @@ mod cmd_parser;
 mod commands;
 mod sorted_set;
 use sorted_set::SortedSet;
-pub use cmd_parser::{Parser, Command};
+pub use cmd_parser::Command;
 pub use commands::COMMANDS;
 
 pub type ByteString = Vec<u8>;

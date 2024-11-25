@@ -1,8 +1,9 @@
 [package]
-name = "rudis-server"
-version = "0.1.0"
-edition = "2021"
+name = 'rudis-server'
+version = '0.1.0'
+edition = '2021'
 
 [dependencies]
-anyhow = { workspace = true } 
+anyhow = { workspace = true }
 rudis = { workspace = true }
+smol = '2'
