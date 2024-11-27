@@ -1,4 +1,5 @@
 use std::io::Write;
+use clap::Parser;
 use macro_rules_attribute::apply;
 use smol_macros::main;
 use smol::channel::{Receiver, Sender};
@@ -8,14 +9,26 @@ use smol::net::{TcpListener, TcpStream};
 use rudis::{execute_command, write_response, Command, Database, Response};
 
 mod cmd_parser;
-use cmd_parser::Parser;
+use cmd_parser::CmdParser;
+
+#[derive(clap::Parser)]
+#[command(version, about)]
+struct Args {
+    /// port to listen to
+    #[arg(short, long, default_value = "8888")]
+    port: u16,
+
+    /// ip to bind to
+    #[arg(long, default_value = "0.0.0.0")]
+    bind: String,
+}
 
 async fn read_command_task(
     stream: TcpStream,
     db_tx: Sender<(Sender<anyhow::Result<Response>>, Command)>,
     tx: Sender<anyhow::Result<Response>>,
 ) -> anyhow::Result<()> {
-    let mut parser = Parser::new(BufReader::new(stream));
+    let mut parser = CmdParser::new(BufReader::new(stream));
     loop {
         match parser.read_command().await {
             Ok(cmd) => {
@@ -58,7 +71,8 @@ async fn database_task(rx: Receiver<(Sender<anyhow::Result<Response>>, Command)>
 
 #[apply(main!)]
 async fn main() -> anyhow::Result<()> {
-    let listener = TcpListener::bind(("0.0.0.0", 8888)).await?;
+    let args = Args::parse();
+    let listener = TcpListener::bind((args.bind, args.port)).await?;
     let (tx, rx) = smol::channel::bounded(1024);
     smol::spawn(database_task(rx)).detach();
     loop {

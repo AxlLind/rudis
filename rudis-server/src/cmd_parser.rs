@@ -1,12 +1,12 @@
 use rudis::{ByteString, Command};
 use smol::io::{AsyncRead, AsyncReadExt};
 
-pub struct Parser<R> {
+pub struct CmdParser<R> {
     reader: R,
     peeked: Option<u8>,
 }
 
-impl<R: AsyncRead + Unpin> Parser<R> {
+impl<R: AsyncRead + Unpin> CmdParser<R> {
     pub fn new(reader: R) -> Self {
         Self { reader, peeked: None }
     }
@@ -84,19 +84,19 @@ mod test {
 
     #[apply(test!)]
     async fn test_parse_array() {
-        let mut res = Parser::new(b"*2\r\n$3\r\nFOO\r\n$3\r\nbar\r\n".as_slice()).read_command().await.unwrap();
+        let mut res = CmdParser::new(b"*2\r\n$3\r\nFOO\r\n$3\r\nbar\r\n".as_slice()).read_command().await.unwrap();
         assert_eq!(res.cmd(), "foo");
         assert_eq!(res.parse_args::<ByteString>().unwrap(), b"bar".to_vec());
     }
 
     #[apply(test!)]
     async fn test_parse_empty_array() {
-        assert!(Parser::new(b"*0\r\n".as_slice()).read_command().await.is_err());
+        assert!(CmdParser::new(b"*0\r\n".as_slice()).read_command().await.is_err());
     }
 
     #[apply(test!)]
     async fn test_parse_pipelined_arrays() {
-        let mut parser = Parser::new(b"*1\r\n$1\r\nA\r\n*3\r\n$4\r\nABCD\r\n$0\r\n\r\n$2\r\nxx\r\n".as_slice());
+        let mut parser = CmdParser::new(b"*1\r\n$1\r\nA\r\n*3\r\n$4\r\nABCD\r\n$0\r\n\r\n$2\r\nxx\r\n".as_slice());
         let mut res = parser.read_command().await.unwrap();
         assert_eq!(res.cmd(), "a");
         assert!(res.parse_args::<Vec<ByteString>>().unwrap().is_empty());
