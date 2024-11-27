@@ -1,0 +1,11 @@
+on: push
+name: Lints and tests
+jobs:
+  lints-and-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup update
+      - run: cargo clippy
+      - run: cargo build --release
+      - run: cargo test --release
