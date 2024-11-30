@@ -6,6 +6,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: rustup update
-      - run: cargo clippy
       - run: cargo build --release
       - run: cargo test --release
+      - run: cargo clippy
