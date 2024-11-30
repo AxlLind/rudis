@@ -9,7 +9,9 @@ use smol::net::{TcpListener, TcpStream};
 use rudis::{execute_command, write_response, Command, Database, Response};
 
 mod cmd_parser;
+mod async_pipe;
 use cmd_parser::CmdParser;
+use async_pipe::AsyncPipe;
 
 #[derive(clap::Parser)]
 #[command(version, about)]
@@ -25,7 +27,7 @@ struct Args {
 
 async fn read_command_task(
     stream: TcpStream,
-    db_tx: Sender<(Sender<anyhow::Result<Response>>, Command)>,
+    pipe: AsyncPipe<Command, Response>,
     tx: Sender<anyhow::Result<Response>>,
 ) -> anyhow::Result<()> {
     let mut parser = CmdParser::new(BufReader::new(stream));
@@ -33,7 +35,7 @@ async fn read_command_task(
         match parser.read_command().await {
             Ok(cmd) => {
                 println!("Got command: {}", cmd);
-                db_tx.send((tx.clone(), cmd)).await?;
+                pipe.send(cmd, tx.clone()).await;
             }
             Err(e) => tx.send(Err(e)).await?,
         }
@@ -52,18 +54,18 @@ async fn send_response_task(mut stream: TcpStream, rx: Receiver<anyhow::Result<R
     }
 }
 
-async fn handle_connection(stream: TcpStream, db_tx: Sender<(Sender<anyhow::Result<Response>>, Command)>) {
+async fn handle_connection(stream: TcpStream, pipe: AsyncPipe<Command, Response>) {
     let (tx, rx) = smol::channel::bounded(128);
     let _ = smol::future::zip(
-        read_command_task(stream.clone(), db_tx, tx),
+        read_command_task(stream.clone(), pipe, tx),
         send_response_task(stream, rx),
     ).await;
 }
 
-async fn database_task(rx: Receiver<(Sender<anyhow::Result<Response>>, Command)>) {
+async fn database_task(pipe: AsyncPipe<Command, Response>) {
     let mut db = Database::default();
     loop {
-        let (tx, cmd) = rx.recv().await.expect("failed to read from command queue");
+        let (cmd, tx) = pipe.recv().await;
         let res = execute_command(&mut db, cmd);
         let _ = tx.send(res).await;
     }
@@ -73,10 +75,10 @@ async fn database_task(rx: Receiver<(Sender<anyhow::Result<Response>>, Command)>
 async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     let listener = TcpListener::bind((args.bind, args.port)).await?;
-    let (tx, rx) = smol::channel::bounded(1024);
-    smol::spawn(database_task(rx)).detach();
+    let pipe = AsyncPipe::new(1024);
+    smol::spawn(database_task(pipe.clone())).detach();
     loop {
         let (stream, _) = listener.accept().await?;
-        smol::spawn(handle_connection(stream, tx.clone())).detach();
+        smol::spawn(handle_connection(stream, pipe.clone())).detach();
     }
 }
