@@ -71,14 +71,56 @@ async fn database_task(pipe: AsyncPipe<Command, Response>) {
     }
 }
 
-#[apply(main!)]
-async fn main() -> anyhow::Result<()> {
-    let args = Args::parse();
-    let listener = TcpListener::bind((args.bind, args.port)).await?;
+async fn run_server(bind: &str, port: u16) -> anyhow::Result<()> {
+    let listener = TcpListener::bind((bind, port)).await?;
     let pipe = AsyncPipe::new(1024);
     smol::spawn(database_task(pipe.clone())).detach();
     loop {
         let (stream, _) = listener.accept().await?;
         smol::spawn(handle_connection(stream, pipe.clone())).detach();
+    }
+}
+
+#[apply(main!)]
+async fn main() -> anyhow::Result<()> {
+    let args = Args::parse();
+    run_server(&args.bind, args.port).await
+}
+
+#[cfg(test)]
+mod tests {
+    use std::time::Duration;
+
+    use super::*;
+    use smol::io::AsyncBufReadExt;
+    use smol_macros::test;
+
+    async fn send_cmd(stream: &mut TcpStream, cmd: &[&str]) {
+        let mut buf = Vec::new();
+        write!(buf, "*{}\r\n", cmd.len()).unwrap();
+        for c in cmd {
+            write!(buf, "${}\r\n{}\r\n", c.len(), c).unwrap();
+        }
+        stream.write_all(&buf).await.unwrap();
+    }
+
+    async fn read_resp(reader: &mut BufReader<TcpStream>) -> Vec<u8> {
+        let mut buf = Vec::new();
+        reader.read_until(b'\n', &mut buf).await.unwrap();
+        buf
+    }
+
+    #[apply(test!)]
+    async fn test_server_communication() {
+        smol::spawn(run_server("127.0.0.1", 61111)).detach();
+        smol::Timer::after(Duration::from_millis(100)).await;
+        let mut stream = TcpStream::connect(("127.0.0.1", 61111)).await.unwrap();
+        send_cmd(&mut stream, &["set", "x", "123"]).await;
+        send_cmd(&mut stream, &["get", "x"]).await;
+        send_cmd(&mut stream, &["get", "y"]).await;
+        let mut reader = BufReader::new(stream);
+        assert_eq!(read_resp(&mut reader).await, b"+OK\r\n");
+        assert_eq!(read_resp(&mut reader).await, b"+123\r\n");
+        assert_eq!(read_resp(&mut reader).await, b"$-1\r\n");
     }
 }
