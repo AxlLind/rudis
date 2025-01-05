@@ -21,7 +21,7 @@ pub fn run(_: &mut Database, cmd: Command) -> anyhow::Result<Response> {
     let t = SystemTime::now().duration_since(UNIX_EPOCH).expect("now is later than unix epoch");
     let s = t.as_secs().to_string().into_bytes();
     let ms = t.subsec_micros().to_string().into_bytes();
-    Ok(Response::string_array(vec![s, ms]))
+    Ok(Response::string_array([s, ms]))
 }
 
 // TODO: how to test this?
