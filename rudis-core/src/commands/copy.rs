@@ -16,15 +16,15 @@ pub static INFO: CommandInfo = CommandInfo {
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (src, dst) = cmd.parse_args::<(ByteString, ByteString)>()?;
-    let value = match db.get(&src) {
+    let v = match db.get(&src) {
         Some(v) => {
             let copy = v.clone();
             db.set(dst, copy);
-            Response::Number(1)
+            1
         }
-        None => Response::Number(0),
+        None => 0
     };
-    Ok(value)
+    Ok(Response::Number(v))
 }
 
 #[cfg(test)]
