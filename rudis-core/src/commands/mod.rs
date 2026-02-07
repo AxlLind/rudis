@@ -99,6 +99,7 @@ register_commands! {
     lpop,
     lpush,
     lrange,
+    mget,
     ping,
     quit,
     rename,
