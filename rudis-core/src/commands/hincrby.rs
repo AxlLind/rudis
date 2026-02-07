@@ -1,4 +1,4 @@
-use super::{int_from_bytes, CommandInfo};
+use super::{parse_from_bytes, CommandInfo};
 use crate::cmd_parser::Command;
 use crate::{ByteString, Database, Response};
 
@@ -18,7 +18,7 @@ pub static INFO: CommandInfo = CommandInfo {
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, field, increment) = cmd.parse_args::<(ByteString, ByteString, i64)>()?;
     let h = db.get_or_insert_hash(key)?;
-    let n = h.get(&field).map_or(Ok(0), |v| int_from_bytes(v))? + increment;
+    let n = h.get(&field).map_or(Ok(0), |v| parse_from_bytes(v))? + increment;
     h.insert(field, n.to_string().into_bytes());
     Ok(Response::Number(n))
 }

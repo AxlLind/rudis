@@ -1,18 +1,18 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 use std::sync::LazyLock;
 
 use crate::{Command, Database, Response, ByteString, Value};
 
-pub fn int_from_bytes(bytes: &[u8]) -> anyhow::Result<i64> {
+pub fn parse_from_bytes<T: FromStr>(bytes: &[u8]) -> anyhow::Result<T> {
     std::str::from_utf8(bytes)
         .map_err(|_| anyhow::anyhow!("tried to parse number, got non-utf8 value"))?
-        .parse::<i64>()
+        .parse::<T>()
         .map_err(|_| anyhow::anyhow!("tried to parse number, got non-numeric value"))
 }
 
 pub fn incr_by(db: &mut Database, key: ByteString, step: i64) -> anyhow::Result<Response> {
     let val = step + match db.get_str(&key)? {
-        Some(v) => int_from_bytes(v)?,
+        Some(v) => parse_from_bytes(v)?,
         None => 0,
     };
     db.set(key, Value::String(val.to_string().into_bytes()));
@@ -94,6 +94,7 @@ register_commands! {
     hvals,
     incr,
     incrby,
+    incrbyfloat,
     llen,
     lpop,
     lpush,

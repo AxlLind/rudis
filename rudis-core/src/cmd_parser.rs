@@ -24,6 +24,16 @@ impl FromArgs for i64 {
     }
 }
 
+impl FromArgs for f64 {
+    fn from_args(cmd: &mut Command) -> anyhow::Result<Self> {
+        let v = cmd.pop_arg().ok_or(anyhow::anyhow!("too few arguments"))?;
+        std::str::from_utf8(&v)
+            .map_err(|_| anyhow::anyhow!("tried to parse float, got non-utf8 value"))?
+            .parse()
+            .map_err(|_| anyhow::anyhow!("tried to parse float, got non-numeric value"))
+    }
+}
+
 impl<T: FromArgs> FromArgs for Vec<T> {
     fn from_args(cmd: &mut Command) -> anyhow::Result<Self> {
         let mut v = Vec::new();

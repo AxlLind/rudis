@@ -16,6 +16,10 @@ impl AsResponse for i64 {
     fn as_response(s: Self) -> Response { Response::Number(s) }
 }
 
+impl AsResponse for f64 {
+    fn as_response(s: Self) -> Response { Response::BulkString(s.to_string().into_bytes()) }
+}
+
 impl<const N: usize> AsResponse for [&str; N] {
     fn as_response(s: Self) -> Response {
         Response::string_array(s.iter().map(|x| x.as_bytes().to_vec()))
