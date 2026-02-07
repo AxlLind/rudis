@@ -100,6 +100,7 @@ register_commands! {
     lpush,
     lrange,
     mget,
+    mset,
     ping,
     quit,
     rename,

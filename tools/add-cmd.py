@@ -10,7 +10,7 @@ REPO_ROOT = (Path(__file__).parent / '..').resolve()
 SRC = """
 use super::CommandInfo;
 use crate::cmd_parser::Command;
-use crate::{{ByteString, Database, Response}};
+use crate::{{ByteString, Database, Response, Value}};
 
 pub static INFO: CommandInfo = CommandInfo {{
     name: b"{name}",
@@ -22,6 +22,7 @@ pub static INFO: CommandInfo = CommandInfo {{
 }};
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {{
+    let key = cmd.parse_args::<ByteString>()?;
     todo!()
 }}
 
