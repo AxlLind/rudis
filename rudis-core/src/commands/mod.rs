@@ -124,6 +124,7 @@ register_commands! {
     sismember,
     smembers,
     smove,
+    spop,
     srem,
     strlen,
     substr,
