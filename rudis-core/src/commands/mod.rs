@@ -110,6 +110,7 @@ register_commands! {
     quit,
     rename,
     renamenx,
+    role,
     rpop,
     rpush,
     sadd,
