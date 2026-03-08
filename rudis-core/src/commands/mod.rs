@@ -89,6 +89,7 @@ register_commands! {
     hget,
     hgetall,
     hincrby,
+    hincrbyfloat,
     hkeys,
     hlen,
     hset,
