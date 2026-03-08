@@ -92,6 +92,7 @@ register_commands! {
     hincrbyfloat,
     hkeys,
     hlen,
+    hmget,
     hset,
     hstrlen,
     hvals,
