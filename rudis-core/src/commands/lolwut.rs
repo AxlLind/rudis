@@ -34,6 +34,6 @@ pub fn run(_: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 
 #[cfg(test)]
 crate::command_test! {
-    "lolwut" => get_reply().as_str();
+    "lolwut"               => get_reply().as_str();
     "lolwut VERSION 0.1.0" => get_reply().as_str();
 }

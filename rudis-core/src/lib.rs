@@ -143,6 +143,10 @@ impl Database {
     pub fn clear(&mut self) {
         self.state.clear();
     }
+
+    pub fn keys(&mut self) -> impl Iterator<Item=&[u8]> {
+        self.state.keys().map(|k| k.as_slice())
+    }
 }
 
 pub fn escape_bytes(bytes: &[u8]) -> String {

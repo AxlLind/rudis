@@ -97,6 +97,7 @@ register_commands! {
     incr,
     incrby,
     incrbyfloat,
+    keys,
     lindex,
     llen,
     lolwut,

@@ -28,17 +28,17 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 
 #[cfg(test)]
 crate::command_test! {
-    "lindex l 0" => ();
-    "lindex l -1" => ();
-    "lindex l 99999" => ();
+    "lindex l 0"      => ();
+    "lindex l -1"     => ();
+    "lindex l 99999"  => ();
     "rpush l 1 2 3 4" => 4;
-    "lindex l 0" => "1";
-    "lindex l 3" => "4";
-    "lindex l 4" => ();
-    "lindex l 99999" => ();
-    "lindex l -1" => "4";
-    "lindex l -2" => "3";
-    "lindex l -4" => "1";
-    "lindex l -5" => ();
+    "lindex l 0"      => "1";
+    "lindex l 3"      => "4";
+    "lindex l 4"      => ();
+    "lindex l 99999"  => ();
+    "lindex l -1"     => "4";
+    "lindex l -2"     => "3";
+    "lindex l -4"     => "1";
+    "lindex l -5"     => ();
     "lindex l -99999" => ();
 }
