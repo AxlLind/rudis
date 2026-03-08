@@ -1,6 +1,6 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 use super::CommandInfo;
-use crate::cmd_parser::Command;
+use crate::command::Command;
 use crate::{Database, Response};
 
 pub static INFO: CommandInfo = CommandInfo {

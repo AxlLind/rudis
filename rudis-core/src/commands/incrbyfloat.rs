@@ -1,5 +1,5 @@
 use super::CommandInfo;
-use crate::cmd_parser::Command;
+use crate::command::Command;
 use crate::commands::parse_from_bytes;
 use crate::{ByteString, Database, Response, Value};
 

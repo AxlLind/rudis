@@ -1,11 +1,11 @@
 use std::collections::{HashMap, HashSet};
 use std::io::Write;
 
-mod cmd_parser;
+mod command;
 mod commands;
 mod sorted_set;
 use sorted_set::SortedSet;
-pub use cmd_parser::Command;
+pub use command::Command;
 pub use commands::COMMANDS;
 
 pub type ByteString = Vec<u8>;
