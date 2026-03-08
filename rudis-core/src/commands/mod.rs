@@ -60,7 +60,9 @@ macro_rules! register_commands {
 
         pub static COMMANDS: LazyLock<HashMap<&[u8], (CommandFn, &CommandInfo)>> = LazyLock::new(|| {
             let mut commands = HashMap::new();
-            $(commands.insert($command::INFO.name, ($command::run as _, &$command::INFO));)+
+            for &(run, info) in COMMAND_LIST {
+                commands.insert(info.name, (run, info));
+            }
             commands
         });
     };
