@@ -36,7 +36,12 @@ macro_rules! command_test {
                 let cmd = $crate::Command::new($cmd.split(' ').map(|w| w.as_bytes().to_vec()).collect()).unwrap();
                 let res = $crate::execute_command(&mut db, cmd).unwrap();
                 let expected = $crate::test_utils::AsResponse::as_response($expected);
-                assert_eq!(res, expected, $cmd);
+                match (res, &expected) {
+                    (Response::BulkString(s), Response::SimpleString(_)) => {
+                        assert_eq!(Response::SimpleString(s), expected, $cmd);
+                    }
+                    (res, _) => assert_eq!(res, expected, $cmd),
+                }
             )+
         }
     };

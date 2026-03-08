@@ -99,6 +99,7 @@ register_commands! {
     incrbyfloat,
     lindex,
     llen,
+    lolwut,
     lpop,
     lpush,
     lrange,
