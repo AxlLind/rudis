@@ -1,3 +1,5 @@
+use ordered_float::NotNan;
+
 use super::CommandInfo;
 use crate::command::Command;
 use crate::{ByteString, Database, Response};
@@ -16,12 +18,15 @@ pub static INFO: CommandInfo = CommandInfo {
 };
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
-    let (key, members) = cmd.parse_args::<(ByteString, Vec<(i64, ByteString)>)>()?;
+    let (key, members) = cmd.parse_args::<(ByteString, Vec<(f64, ByteString)>)>()?;
     let z = db.get_or_insert_zset(key)?;
-    let added = members.into_iter()
-        .map(|(score, v)| z.insert(score, v).is_none())
-        .filter(|&b| b)
-        .count();
+    let mut added = 0;
+    for (score, member) in members {
+        let score = NotNan::new(score)?;
+        if z.insert(score, member).is_none() {
+            added += 1;
+        }
+    }
     Ok(Response::Number(added as _))
 }
 

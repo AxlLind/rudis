@@ -16,7 +16,7 @@ pub enum Value {
     Array(Vec<ByteString>),
     Hash(HashMap<ByteString, ByteString>),
     Set(HashSet<ByteString>),
-    ZSet(SortedSet<i64, ByteString>),
+    ZSet(SortedSet),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -31,6 +31,10 @@ pub enum Response {
 impl Response {
     pub fn string_array(strings: impl IntoIterator<Item=ByteString>) -> Self {
         Self::Array(strings.into_iter().map(Response::BulkString).collect())
+    }
+
+    pub fn float(f: f64) -> Self {
+        Self::BulkString(f.to_string().into_bytes())
     }
 }
 
@@ -80,7 +84,7 @@ impl Database {
         }
     }
 
-    pub fn get_zset(&mut self, key: &[u8]) -> anyhow::Result<Option<&mut SortedSet<i64, ByteString>>> {
+    pub fn get_zset(&mut self, key: &[u8]) -> anyhow::Result<Option<&mut SortedSet>> {
         match self.get(key) {
             Some(Value::ZSet(v)) => Ok(Some(v)),
             Some(_) => anyhow::bail!("expected zset value"),
@@ -120,7 +124,7 @@ impl Database {
         }
     }
 
-    pub fn get_or_insert_zset(&mut self, key: Vec<u8>) -> anyhow::Result<&mut SortedSet<i64, ByteString>> {
+    pub fn get_or_insert_zset(&mut self, key: Vec<u8>) -> anyhow::Result<&mut SortedSet> {
         let v = self.state.entry(key).or_insert_with(|| Value::ZSet(SortedSet::new()));
         match v {
             Value::ZSet(v) => Ok(v),

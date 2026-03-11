@@ -22,7 +22,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let Some(set) = db.get_zset(&key)? else { return Ok(Response::Nil) };
     let Some((score, rank)) = set.rank(member) else { return Ok(Response::Nil) };
     let res = if withscore {
-        Response::Array(vec![Response::Number(rank as _), Response::Number(score)])
+        Response::Array(vec![Response::Number(rank as _), Response::float(score)])
     } else {
         Response::Number(rank as _)
     };
@@ -31,7 +31,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 
 #[cfg(test)]
 crate::command_test! {
-    "zadd z b 1 a 1 c 2 d 3" => 4;
+    "zadd z 1 b 1 a 2 c 3 d" => 4;
     "zrank z x" => ();
     "zrank z a" => 0;
     "zrank z b" => 1;

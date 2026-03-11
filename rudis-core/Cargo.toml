@@ -6,4 +6,5 @@ edition = '2024'
 [dependencies]
 anyhow = { workspace = true }
 glob-match = "0.2.1"
+ordered-float = "5.1.0"
 skiplist = "1.0.0"

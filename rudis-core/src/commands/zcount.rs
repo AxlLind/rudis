@@ -1,3 +1,5 @@
+use ordered_float::NotNan;
+
 use super::CommandInfo;
 use crate::command::Command;
 use crate::{ByteString, Database, Response};
@@ -15,7 +17,9 @@ pub static INFO: CommandInfo = CommandInfo {
 };
 
 pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
-    let (key, min, max) = cmd.parse_args::<(ByteString, i64, i64)>()?;
+    let (key, min, max) = cmd.parse_args::<(ByteString, f64, f64)>()?;
+    let min = NotNan::new(min)?;
+    let max = NotNan::new(max)?;
     let count = db.get_zset(&key)?.map(|z| z.range(min, max).count()).unwrap_or(0);
     Ok(Response::Number(count as _))
 }

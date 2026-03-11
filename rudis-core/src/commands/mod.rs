@@ -139,6 +139,8 @@ register_commands! {
     zadd,
     zcard,
     zcount,
+    zpopmax,
+    zpopmin,
     zrank,
     zrem,
     zscore,

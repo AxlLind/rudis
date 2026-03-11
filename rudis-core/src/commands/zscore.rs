@@ -18,7 +18,7 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     let (key, member) = cmd.parse_args::<(ByteString, ByteString)>()?;
     let res = db.get_zset(&key)?
         .and_then(|z| z.get_score(&member))
-        .map(Response::Number)
+        .map(Response::float)
         .unwrap_or_default();
     Ok(res)
 }
@@ -26,8 +26,8 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 #[cfg(test)]
 crate::command_test! {
     "zadd x 1 a 99 b" => 2;
-    "zscore x a"      => 1;
-    "zscore x b"      => 99;
+    "zscore x a"      => "1";
+    "zscore x b"      => "99";
     "zscore x c"      => ();
     "zscore q a"      => ();
 }
