@@ -62,6 +62,18 @@ impl SortedSet {
         let r = self.smap.rank(&(s.clone(), t))?;
         Some((*s, r))
     }
+
+    pub fn popmax(&mut self) -> Option<(f64, ByteString)> {
+        let (s, t) = self.smap.pop_last()?;
+        self.map.remove(&t);
+        Some((*s, t))
+    }
+
+    pub fn popmin(&mut self) -> Option<(f64, ByteString)> {
+        let (s, t) = self.smap.pop_first()?;
+        self.map.remove(&t);
+        Some((*s, t))
+    }
 }
 
 impl Debug for SortedSet {
