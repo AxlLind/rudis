@@ -1,6 +1,6 @@
 use super::CommandInfo;
 use crate::command::Command;
-use crate::{ByteString, Database, Response};
+use crate::{Database, Response};
 
 pub static INFO: CommandInfo = CommandInfo {
     name: b"lolwut",
@@ -28,7 +28,8 @@ fn get_reply() -> String {
 }
 
 pub fn run(_: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
-    let _ = cmd.parse_args::<Option<(ByteString, ByteString)>>()?;
+    let _ = cmd.parse_named_arg("VERSION");
+    cmd.ensure_empty()?;
     Ok(Response::BulkString(get_reply().into_bytes()))
 }
 

@@ -89,6 +89,11 @@ impl Command {
         !self.args.is_empty()
     }
 
+    pub fn ensure_empty(&self) -> anyhow::Result<()> {
+        anyhow::ensure!(self.args.is_empty(), "Too many arguments to {}", self.cmd());
+        Ok(())
+    }
+
     pub fn cmd(&self) -> &str {
         &self.cmd
     }
@@ -97,13 +102,29 @@ impl Command {
         self.args.pop_front()
     }
 
+    pub fn parse_option(&mut self, option: &str) -> bool {
+        if self.args.front().is_some_and(|arg| arg.eq_ignore_ascii_case(option.as_bytes())) {
+            self.pop_arg();
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn parse_named_arg(&mut self, argument: &str) -> Option<ByteString> {
+        if !self.parse_option(argument) {
+            return None;
+        }
+        self.pop_arg()
+    }
+
     pub fn parse_partial_args<T: FromArgs>(&mut self) -> anyhow::Result<T> {
         T::from_args(self)
     }
 
     pub fn parse_args<T: FromArgs>(&mut self) -> anyhow::Result<T> {
         let res = self.parse_partial_args::<T>()?;
-        anyhow::ensure!(self.args.is_empty(), "Too many arguments to {}", self.cmd());
+        self.ensure_empty()?;
         Ok(res)
     }
 }
