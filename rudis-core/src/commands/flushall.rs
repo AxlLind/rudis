@@ -25,7 +25,6 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     }
 }
 
-// TODO: test multiple databases
 #[cfg(test)]
 crate::command_test! {
     "set x 1"      => "OK";

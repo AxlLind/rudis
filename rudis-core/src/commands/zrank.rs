@@ -37,6 +37,5 @@ crate::command_test! {
     "zrank z b" => 1;
     "zrank z c" => 2;
     "zrank z d" => 3;
-    // TODO: how to test do test with array of different element types?
-    // "zrank z a WITHSCORE" => [0, "1"];
+    "zrank z a WITHSCORE" => [0, "1"];
 }

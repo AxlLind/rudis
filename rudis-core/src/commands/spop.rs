@@ -38,6 +38,11 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
 }
 
 // TODO: can't test this currently due to unpredictable order of returned elements
-// #[cfg(test)]
-// crate::command_test! {
-// }
+#[cfg(test)]
+crate::command_test! {
+    "sadd x 1 2 3" => 3;
+    "spop x 3"     => ["1", "2", "3"] ignore_order;
+    "scard x"      => 0;
+    "sadd x 1"     => 1;
+    "spop x"       => "1";
+}
