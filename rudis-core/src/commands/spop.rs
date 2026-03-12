@@ -37,7 +37,6 @@ pub fn run(db: &mut Database, mut cmd: Command) -> anyhow::Result<Response> {
     Ok(res)
 }
 
-// TODO: can't test this currently due to unpredictable order of returned elements
 #[cfg(test)]
 crate::command_test! {
     "sadd x 1 2 3" => 3;

@@ -23,9 +23,3 @@ pub fn run(_: &mut Database, cmd: Command) -> anyhow::Result<Response> {
     let ms = t.subsec_micros().to_string().into_bytes();
     Ok(Response::string_array([s, ms]))
 }
-
-// TODO: how to test this?
-// #[cfg(test)]
-// crate::command_test! {
-//     "time" => ["1", "0"];
-// }

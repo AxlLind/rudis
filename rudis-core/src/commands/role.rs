@@ -25,9 +25,3 @@ pub fn run(_: &mut Database, cmd: Command) -> anyhow::Result<Response> {
     ]);
     Ok(res)
 }
-
-// TODO: cannot test, framework does not support nested arrays
-// #[cfg(test)]
-// crate::command_test! {
-//     "role" => ["master", 0, []];
-// }
